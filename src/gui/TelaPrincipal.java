@@ -93,7 +93,7 @@ public class TelaPrincipal {
         toolBar = new JToolBar();
         grupoBtn = new ButtonGroup();
         JToggleButton b1 = new JToggleButton("Linha");
-        JToggleButton b2 = new JToggleButton("Triangulo");
+        JToggleButton b2 = new JToggleButton("Triângulo");
         grupoBtn.add(b1);
         grupoBtn.add(b2);
         toolBar.add(b1);
@@ -101,10 +101,12 @@ public class TelaPrincipal {
         
         grupoBtn.setSelected(b1.getModel(), true);
         
-        JButton cor = new JButton("Cor");
+        JButton zoom = new JButton("Zoom");
+        JButton desfazer = new JButton("Desfazer");
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(Box.createVerticalGlue());
-        toolBar.add(cor);
+        toolBar.add(zoom);
+        toolBar.add(desfazer);
         
         painelPrincipal.add(toolBar, BorderLayout.PAGE_START);
     }
