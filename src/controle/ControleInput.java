@@ -21,12 +21,13 @@ public class ControleInput implements MouseListener, MouseMotionListener, MouseW
 
     @Override
     public void mousePressed(MouseEvent e) {
-        controleDesenho.mouseClick(e.getX(), e.getY());
+        controleDesenho.mouseClick(e.getX(), e.getY(), e.getButton());
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        controleDesenho.setMousePos(e.getX(), e.getY());
+        controleDesenho.mouseRelease(e.getX(), e.getY(), e.getButton());
+        //controleDesenho.setMousePos(e.getX(), e.getY());
     }
 
     @Override
@@ -39,7 +40,8 @@ public class ControleInput implements MouseListener, MouseMotionListener, MouseW
 
     @Override
     public void mouseDragged(MouseEvent e) {
-        controleDesenho.setMousePos(e.getX(), e.getY());
+        controleDesenho.mouseArrastar(e.getX(), e.getY());
+        //controleDesenho.setMousePos(e.getX(), e.getY());
     }
 
     @Override

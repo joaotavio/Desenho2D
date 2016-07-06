@@ -4,6 +4,7 @@ import gui.PainelDesenho;
 import gui.TelaPrincipal;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -20,6 +21,10 @@ public class ControleDesenho implements ActionListener {
     private int mouseY;
     private boolean desenhando;
     
+    private boolean pan;
+    private int mouseX_antigo;
+    private int mouseY_antigo;
+    
     private String shape;
     
     private ArrayList<Line2D.Double> linhas;
@@ -28,11 +33,11 @@ public class ControleDesenho implements ActionListener {
     public static final int PROXIMIDADE = 15;
     private Point2D pontoProximidade;
     
-    private final Timer timer;
-    public static final int DELAY = 17;
-    
     public static final double FATOR_ZOOM_IN = 1.5;
     public static final double FATOR_ZOOM_OUT = 0.66666667;
+    
+    private final Timer timer;
+    public static final int DELAY = 17;
 
     public ControleDesenho() {
         linhas = new ArrayList<>();
@@ -71,11 +76,32 @@ public class ControleDesenho implements ActionListener {
         }
     }
     
+    public void pan(){
+        int dx = mouseX - mouseX_antigo;
+        int dy = mouseY - mouseY_antigo;
+        
+        for (Line2D.Double linha : linhas) {
+            Point2D p1 = translacao(linha.getP1(), dx, dy);
+            Point2D p2 = translacao(linha.getP2(), dx, dy);
+            linha.setLine(p1, p2);
+        }
+    }
+    
     // Faz a escala de um ponto p em relação ao ponto ref
     public Point2D escala(Point2D p, Point2D ref, double sx, double sy){
         double x = (sx * p.getX()) + (ref.getX() - ref.getX() * sx);
         double y = (sy * p.getY()) + (ref.getY() - ref.getY() * sy);
         return new Point2D.Double(x, y);
+    }
+    
+    public Point2D translacao(Point2D p, double dx, double dy){
+        double x = p.getX() + dx;
+        double y = p.getY() + dy;
+        return new Point2D.Double(x, y);
+    }
+    
+    public Point2D rotacao(Point2D p, Point2D ref, double theta){
+        return null;
     }
     
     @Override
@@ -84,14 +110,39 @@ public class ControleDesenho implements ActionListener {
         desenhar();
     }
     
-    public void mouseClick(int x, int y) {
-        setMousePos(x, y);
-        if (!desenhando){
-            linhaAtual = new Line2D.Double(mouseX, mouseY, mouseX, mouseY);
-        } else {
-            linhas.add(linhaAtual);
+    public void mouseClick(int x, int y, int botao) {
+        if (botao == MouseEvent.BUTTON1){
+            setMousePos(x, y);
+            if (!desenhando){
+                linhaAtual = new Line2D.Double(mouseX, mouseY, mouseX, mouseY);
+            } else {
+                linhas.add(linhaAtual);
+            }
+            desenhando = !desenhando;
+        } else if (botao == MouseEvent.BUTTON2){
+            pan = true;
+            mouseX_antigo = x;
+            mouseY_antigo = y;
+            painelDesenho.setPan(pan);
         }
-        desenhando = !desenhando;
+            
+    }
+    
+    public void mouseRelease(int posX, int posY, int botao){
+        if (botao == MouseEvent.BUTTON2){
+            pan = false;
+            painelDesenho.setPan(pan);
+        }
+    }
+    
+    public void mouseArrastar(int posX, int posY){
+        if (pan){
+            mouseX = posX;
+            mouseY = posY;
+            pan();
+        }
+        mouseX_antigo = mouseX;
+        mouseY_antigo = mouseY;
     }
     
     public void moverMouse(int x, int y){
@@ -100,18 +151,6 @@ public class ControleDesenho implements ActionListener {
         if (desenhando){
             linhaAtual.setLine(linhaAtual.getX1(), linhaAtual.getY1(), mouseX, mouseY);
         }
-    }
-    
-    public int getMouseX() {
-        return mouseX;
-    }
-
-    public int getMouseY() {
-        return mouseY;
-    }
-
-    public void setShape(String shape) {
-        this.shape = shape;
     }
     
     public void setMousePos(int x, int y){
@@ -137,6 +176,18 @@ public class ControleDesenho implements ActionListener {
         }
     }
     
+    public int getMouseX() {
+        return mouseX;
+    }
+
+    public int getMouseY() {
+        return mouseY;
+    }
+
+    public void setShape(String shape) {
+        this.shape = shape;
+    }
+    
     public Rectangle2D getRectProximidade(double x, double y){
         return new Rectangle2D.Double(x - PROXIMIDADE/2, y - PROXIMIDADE/2, PROXIMIDADE, PROXIMIDADE);
     }
@@ -159,6 +210,10 @@ public class ControleDesenho implements ActionListener {
 
     public ControleInput getControleInput() {
         return controleInput;
+    }
+
+    public boolean isPan() {
+        return pan;
     }
 
 }

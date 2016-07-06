@@ -6,7 +6,6 @@ import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import javax.swing.JPanel;
@@ -33,6 +32,15 @@ public class PainelDesenho extends JPanel {
     public void atualizar(){
         //USAR MENOR E MAIOR PONTO PARA FAZER REPAINT APENAS DENTRO DESSES PONTOS
         this.repaint();
+    }
+    
+    public void setPan(boolean isPan){
+        if (isPan) {
+            setCursor(new Cursor(Cursor.MOVE_CURSOR));
+        } else {
+            setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+        }
+        
     }
     
     @Override
