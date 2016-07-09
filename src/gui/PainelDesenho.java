@@ -6,8 +6,6 @@ import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import javax.swing.JPanel;
 
 public class PainelDesenho extends JPanel {
@@ -24,9 +22,9 @@ public class PainelDesenho extends JPanel {
     private void iniciarComponente(){
         this.setBackground(COR_BACKGROUND);
         setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
-        this.addMouseListener(controleDesenho.getControleInput());
-        this.addMouseMotionListener(controleDesenho.getControleInput());
-        this.addMouseWheelListener(controleDesenho.getControleInput());
+        this.addMouseListener(controleDesenho.getMouseInput());
+        this.addMouseMotionListener(controleDesenho.getMouseInput());
+        this.addMouseWheelListener(controleDesenho.getMouseInput());
     }
     
     public void atualizar(){

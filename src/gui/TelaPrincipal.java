@@ -117,6 +117,15 @@ public class TelaPrincipal {
         labelStatus = new JLabel("X: 0 - Y: 0");
         statusBar.add(labelStatus, BorderLayout.LINE_START);
         painelPrincipal.add(statusBar, BorderLayout.PAGE_END);
+        
+        /*JTextField f = new JTextField(50);
+        statusBar.add(f, BorderLayout.LINE_START);
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                f.requestFocus();
+            }
+        });*/
     }
     
     private void atualizarStatusLabel(int x, int y){

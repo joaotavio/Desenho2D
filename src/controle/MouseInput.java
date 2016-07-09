@@ -14,7 +14,6 @@ public class MouseInput implements MouseListener, MouseMotionListener, MouseWhee
     
     private final ControleDesenho controleDesenho;
     
-    
     public MouseInput(ControleDesenho controleDesenho){
         this.controleDesenho = controleDesenho;
     }

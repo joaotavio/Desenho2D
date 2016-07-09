@@ -4,8 +4,10 @@ import formas.Forma;
 import formas.Linha;
 import gui.PainelDesenho;
 import gui.TelaPrincipal;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
@@ -23,6 +25,12 @@ public class ControleDesenho implements ActionListener {
     private int mouseY;
     private boolean desenhando;
     
+    private boolean selecionando;
+    private Rectangle2D rectSelecao;
+    
+    private int mouseX_click;
+    private int mouseY_click;
+    
     private boolean pan;
     private int mouseX_anterior;
     private int mouseY_anterior;
@@ -37,6 +45,8 @@ public class ControleDesenho implements ActionListener {
     
     public static final double FATOR_ZOOM_IN = 1.5;
     public static final double FATOR_ZOOM_OUT = 0.66666667;
+    public static final double ZOOM_MAX = 50;
+    private double zoomAcc;
     
     private final Timer timer;
     public static final int DELAY = 17;
@@ -46,6 +56,7 @@ public class ControleDesenho implements ActionListener {
         controleInput = new MouseInput(this);
         painelDesenho = new PainelDesenho(this);
         tela = new TelaPrincipal(this, painelDesenho);
+        zoomAcc = 1;
         
         timer = new Timer(DELAY, this);
         timer.start();
@@ -55,6 +66,14 @@ public class ControleDesenho implements ActionListener {
         //Snap
         pontoProximidade = null;
         for (Forma forma : formas) {
+            forma.atualizar(mouseX, mouseY);
+            
+            if (forma.intersecao(rectSelecao)){
+                forma.setSelecionada(true);
+            } else {
+                forma.setSelecionada(false);
+            }
+            
             for (Point2D ponto : forma.getPontos()) {
                 if (getRectProximidade(ponto.getX(), ponto.getY()).contains(mouseX, mouseY)) {
                     pontoProximidade = ponto;
@@ -82,13 +101,6 @@ public class ControleDesenho implements ActionListener {
         }
         
         for (Forma forma : formas) {
-            //g.drawRect(getMouseX()-5, getMouseY()-5, 10, 10);
-            
-            if (forma.estaSelecionada()){
-                g.setColor(Color.YELLOW);
-            } else {
-                g.setColor(Color.WHITE);
-            }
             forma.desenhar(g);
         }
         
@@ -96,6 +108,23 @@ public class ControleDesenho implements ActionListener {
             g.setColor(Color.GREEN);
             g.draw(getRectProximidade(pontoProximidade.getX(), pontoProximidade.getY()));
         }
+        
+        if (selecionando){
+            desenharSelecao(g);
+        }
+    }
+    
+    private void desenharSelecao(Graphics2D g){
+        Color c1 = Color.GREEN.darker();
+        Color c2 = new Color(c1.getRed(), c1.getGreen(), c1.getBlue(), 50);
+        g.setColor(c2);
+        g.fill(rectSelecao);
+        g.setColor(Color.WHITE);
+        Stroke original = g.getStroke();
+        float dash[] = { 10.0f };
+        g.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+        g.draw(rectSelecao);
+        g.setStroke(original);
     }
     
     public void zoom(int z, int posX, int posY){
@@ -105,6 +134,12 @@ public class ControleDesenho implements ActionListener {
         } else {
             zoom = FATOR_ZOOM_OUT;
         }
+        
+        if (zoomAcc*zoom > ZOOM_MAX || zoomAcc*zoom < 1/ZOOM_MAX){
+            return;
+        }
+        
+        zoomAcc *= zoom;
         
         Point2D.Double referencia = new Point2D.Double(posX, posY);
         for (Forma forma : formas) {
@@ -130,71 +165,65 @@ public class ControleDesenho implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         atualizar();
-        
     }
     
     private void criaForma() {
     }
     
     public void mouseClick(int posX, int posY, int botao) {
-        if (botao == MouseInput.BOTAO_ESQUERDO){
-            if (!desenhando){
-                fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
-            } else {
-                formas.add(fAtual);
-            }
-            desenhando = !desenhando;
-        } else if (botao == MouseInput.BOTAO_MEIO){
-            pan = true;
-            mouseX_anterior = posX;
-            mouseY_anterior = posY;
-            painelDesenho.setPan(pan);
+        rectSelecao = null;
+        switch (botao) {
+            case MouseInput.BOTAO_ESQUERDO:
+                if (!desenhando){
+                    fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
+                } else {
+                    formas.add(fAtual);
+                }   desenhando = !desenhando;
+                break;
+            case MouseInput.BOTAO_MEIO:
+                pan = true;
+                mouseX_anterior = posX;
+                mouseY_anterior = posY;
+                painelDesenho.setPan(pan);
+                break;
+            case MouseInput.BOTAO_DIREITO:
+                mouseX_click = mouseX;
+                mouseY_click = mouseY;
+                selecionando = true;
+                rectSelecao = new Rectangle2D.Double(mouseX, mouseY, 1, 1);
+                break;
         }
-            
     }
     
     public void mouseRelease(int posX, int posY, int botao){
         if (botao == MouseInput.BOTAO_MEIO){
             pan = false;
             painelDesenho.setPan(pan);
+        } else if (botao == MouseInput.BOTAO_DIREITO){
+            selecionando = false;
         }
     }
     
     public void mouseArrastar(int posX, int posY){
+        mouseX = posX;
+        mouseY = posY;
         if (pan){
-            mouseX = posX;
-            mouseY = posY;
             pan();
+            mouseX_anterior = mouseX;
+            mouseY_anterior = mouseY;
+        } else if (selecionando){
+            double x = Math.min(mouseX_click, posX);
+            double y = Math.min(mouseY_click, posY);
+            double largura = Math.abs(posX - mouseX_click);
+            double altura = Math.abs(posY - mouseY_click);
+            rectSelecao.setRect(x, y, largura, altura);
         }
-        mouseX_anterior = mouseX;
-        mouseY_anterior = mouseY;
+        
     }
     
     public void moverMouse(int x, int y){
-        setMousePos(x, y);
-        
-        
-    }
-    
-    public void setMousePos(int x, int y){
         mouseX = x;
         mouseY = y;
-        /*pontoProximidade = null;
-        for (Forma forma : formas) {
-            for (Point2D ponto : forma.getPontos()) {
-                if (getRectProximidade(ponto.getX(), ponto.getY()).contains(x, y)) {
-                    pontoProximidade = ponto;
-                    break;
-                }
-            }
-        }
-        if (pontoProximidade == null){
-            mouseX = x;
-            mouseY = y;
-        } else {
-            mouseX = (int) pontoProximidade.getX();
-            mouseY = (int) pontoProximidade.getY();
-        }*/
     }
     
     public int getMouseX() {
@@ -221,7 +250,7 @@ public class ControleDesenho implements ActionListener {
         return pontoProximidade;
     }
 
-    public MouseInput getControleInput() {
+    public MouseInput getMouseInput() {
         return controleInput;
     }
 
