@@ -4,6 +4,8 @@ import java.awt.geom.Point2D;
 
 public class Transformacao2D {
     
+    public static final double GRAU_RAD = Math.PI / (double) 180.0;
+    
     private Transformacao2D() {}
     
     /* 
@@ -28,6 +30,10 @@ public class Transformacao2D {
         Faz a rotação de um ponto p, com o ângulo theta, em relação ao ponto ref.
     */
     public static Point2D rotacao(Point2D p, Point2D ref, double theta){
-        return null;
+        double seno = Math.sin(theta * GRAU_RAD);
+        double cos = Math.cos(theta * GRAU_RAD);
+        double x = (cos*p.getX()) - (seno*p.getY()) + (ref.getY()*seno - ref.getX()*cos + ref.getX());
+        double y = (seno*p.getX()) + (cos*p.getY()) + (-ref.getX()*seno - ref.getY()*cos + ref.getY());
+        return new Point2D.Double(x, y);
     }
 }

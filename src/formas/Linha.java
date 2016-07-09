@@ -2,7 +2,6 @@ package formas;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -25,7 +24,7 @@ public class Linha extends Forma{
         if (selecionada){
             g.setColor(Color.YELLOW);
         } else if (mouseOver) {
-            g.setColor(Color.CYAN);
+            g.setColor(Color.CYAN.darker());
         } else {
             g.setColor(Color.WHITE);
         }
