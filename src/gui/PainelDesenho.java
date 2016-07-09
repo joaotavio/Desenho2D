@@ -40,7 +40,6 @@ public class PainelDesenho extends JPanel {
         } else {
             setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         }
-        
     }
     
     @Override
@@ -51,27 +50,7 @@ public class PainelDesenho extends JPanel {
         
         desenharGrid(g2d);
         
-        g2d.setColor(Color.WHITE);
-        g2d.drawOval(controleDesenho.getMouseX()-25, controleDesenho.getMouseY()-25, 50, 50);
-        
-        if (controleDesenho.isDesenhando()){
-            g2d.draw(controleDesenho.getLinhaAtual());
-        }
-        
-        for (Line2D.Double linha : controleDesenho.getLinhas()) {
-            if (linha.intersects(controleDesenho.getMouseX(), controleDesenho.getMouseY(), 10, 10)){
-                g2d.setColor(Color.YELLOW);
-            } else {
-                g2d.setColor(Color.WHITE);
-            }
-            g2d.draw(linha);
-        }
-        
-        Point2D p = controleDesenho.getPontoProximidade();
-        if (p != null){
-            g2d.setColor(Color.GREEN);
-            g2d.draw(controleDesenho.getRectProximidade(p.getX(), p.getY()));
-        }
+        controleDesenho.desenhar(g2d);
     }
     
     private void desenharGrid(Graphics2D g){

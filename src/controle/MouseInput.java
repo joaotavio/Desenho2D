@@ -6,18 +6,21 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-public class ControleInput implements MouseListener, MouseMotionListener, MouseWheelListener {
+public class MouseInput implements MouseListener, MouseMotionListener, MouseWheelListener {
+    
+    public static final int BOTAO_ESQUERDO = MouseEvent.BUTTON1;
+    public static final int BOTAO_MEIO = MouseEvent.BUTTON2;
+    public static final int BOTAO_DIREITO = MouseEvent.BUTTON3;
     
     private final ControleDesenho controleDesenho;
     
-    public ControleInput(ControleDesenho controleDesenho){
+    
+    public MouseInput(ControleDesenho controleDesenho){
         this.controleDesenho = controleDesenho;
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        controleDesenho.setMousePos(e.getX(), e.getY());
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -27,21 +30,17 @@ public class ControleInput implements MouseListener, MouseMotionListener, MouseW
     @Override
     public void mouseReleased(MouseEvent e) {
         controleDesenho.mouseRelease(e.getX(), e.getY(), e.getButton());
-        //controleDesenho.setMousePos(e.getX(), e.getY());
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-    }
+    public void mouseEntered(MouseEvent e) {}
 
     @Override
-    public void mouseExited(MouseEvent e) {
-    }
+    public void mouseExited(MouseEvent e) {}
 
     @Override
     public void mouseDragged(MouseEvent e) {
         controleDesenho.mouseArrastar(e.getX(), e.getY());
-        //controleDesenho.setMousePos(e.getX(), e.getY());
     }
 
     @Override

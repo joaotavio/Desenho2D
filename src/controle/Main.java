@@ -1,7 +1,6 @@
 package controle;
 
 import javax.swing.SwingUtilities;
-import gui.TelaPrincipal;
 
 public class Main {
     
