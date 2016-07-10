@@ -2,6 +2,7 @@ package controle;
 
 import formas.Forma;
 import formas.Linha;
+import formas.Retangulo;
 import gui.PainelDesenho;
 import gui.TelaPrincipal;
 import java.awt.BasicStroke;
@@ -27,12 +28,12 @@ public class ControleDesenho implements ActionListener {
     private boolean desenhando;
     
     private boolean selecionando;
-    private Rectangle2D rectSelecao;
+    private Retangulo rectSelecao;
     
     private int mouseX_click;
     private int mouseY_click;
     
-    private boolean pan;
+    private boolean panning;
     private int mouseX_anterior;
     private int mouseY_anterior;
     
@@ -70,7 +71,7 @@ public class ControleDesenho implements ActionListener {
         for (Forma forma : formas) {
             forma.atualizar(mouseX, mouseY);
             
-            if (forma.intersecao(rectSelecao)){
+            if (rectSelecao != null && forma.intersecao(rectSelecao.getRect2D())){
                 forma.setSelecionada(true);
             } else {
                 forma.setSelecionada(false);
@@ -98,6 +99,7 @@ public class ControleDesenho implements ActionListener {
     
     public void desenhar(Graphics2D g){
         g.setColor(Color.WHITE);
+        
         if (desenhando){
             fAtual.desenhar(g);
         }
@@ -119,13 +121,18 @@ public class ControleDesenho implements ActionListener {
     private void desenharSelecao(Graphics2D g){
         Color c1 = Color.GREEN.darker();
         Color c2 = new Color(c1.getRed(), c1.getGreen(), c1.getBlue(), 50);
-        g.setColor(c2);
-        g.fill(rectSelecao);
-        g.setColor(Color.WHITE);
+        
+        rectSelecao.setCor(c2);
+        rectSelecao.setFill(true);
+        rectSelecao.desenhar(g);
+        
         Stroke original = g.getStroke();
         float dash[] = { 10.0f };
         g.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
-        g.draw(rectSelecao);
+        
+        rectSelecao.setCor(Color.WHITE);
+        rectSelecao.setFill(false);
+        rectSelecao.desenhar(g);
         g.setStroke(original);
     }
     
@@ -163,6 +170,9 @@ public class ControleDesenho implements ActionListener {
         if (desenhando){
             fAtual.escala(zoom, zoom, referencia);
         }
+        if (rectSelecao != null){
+            rectSelecao.escala(zoom, zoom, referencia);
+        }
     }
     
     public void pan(){
@@ -176,7 +186,7 @@ public class ControleDesenho implements ActionListener {
             fAtual.translacao(dx, dy);
         }
         if (rectSelecao != null){
-            //ZOOM E PAN FAZER FORMA RETANGULO
+            rectSelecao.translacao(dx, dy);
         }
     }
     
@@ -193,31 +203,32 @@ public class ControleDesenho implements ActionListener {
             case MouseInput.BOTAO_ESQUERDO:
                 rectSelecao = null;
                 if (!desenhando){
-                    fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
+                    //fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
+                    fAtual = new Retangulo(mouseX, mouseY, 1, 1);
                 } else {
                     formas.add(fAtual);
                 }   
                 desenhando = !desenhando;
                 break;
             case MouseInput.BOTAO_MEIO:
-                pan = true;
+                panning = true;
                 mouseX_anterior = posX;
                 mouseY_anterior = posY;
-                painelDesenho.setPan(pan);
+                painelDesenho.setPan(panning);
                 break;
             case MouseInput.BOTAO_DIREITO:
                 mouseX_click = mouseX;
                 mouseY_click = mouseY;
                 selecionando = true;
-                rectSelecao = new Rectangle2D.Double(mouseX, mouseY, 1, 1);
+                rectSelecao = new Retangulo(mouseX, mouseY, 1, 1);
                 break;
         }
     }
     
     public void mouseRelease(int posX, int posY, int botao){
         if (botao == MouseInput.BOTAO_MEIO){
-            pan = false;
-            painelDesenho.setPan(pan);
+            panning = false;
+            painelDesenho.setPan(panning);
         } else if (botao == MouseInput.BOTAO_DIREITO){
             selecionando = false;
         }
@@ -226,16 +237,12 @@ public class ControleDesenho implements ActionListener {
     public void mouseArrastar(int posX, int posY){
         mouseX = posX;
         mouseY = posY;
-        if (pan){
+        if (panning){
             pan();
             mouseX_anterior = mouseX;
             mouseY_anterior = mouseY;
         } else if (selecionando){
-            double x = Math.min(mouseX_click, posX);
-            double y = Math.min(mouseY_click, posY);
-            double largura = Math.abs(posX - mouseX_click);
-            double altura = Math.abs(posY - mouseY_click);
-            rectSelecao.setRect(x, y, largura, altura);
+            rectSelecao.setDistancia(posX, posY);
         }
         
     }
@@ -277,8 +284,8 @@ public class ControleDesenho implements ActionListener {
         return tecladoInput;
     }
 
-    public boolean isPan() {
-        return pan;
+    public boolean isPanning() {
+        return panning;
     }
 
 }
