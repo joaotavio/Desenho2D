@@ -1,5 +1,6 @@
 package controle;
 
+import formas.Circulo;
 import formas.Forma;
 import formas.Linha;
 import formas.Retangulo;
@@ -30,17 +31,12 @@ public class ControleDesenho implements ActionListener {
     private boolean selecionando;
     private Retangulo rectSelecao;
     
-    private int mouseX_click;
-    private int mouseY_click;
-    
     private boolean panning;
     private int mouseX_anterior;
     private int mouseY_anterior;
     
-    private String formaAtual;
-    
     private final ArrayList<Forma> formas;
-    private Forma fAtual;
+    private Forma formaDesenhando;
     
     public static final int PROXIMIDADE = 15;
     private Point2D pontoProximidade;
@@ -49,6 +45,8 @@ public class ControleDesenho implements ActionListener {
     public static final double FATOR_ZOOM_OUT = 0.66666667;
     public static final double ZOOM_MAX = 50;
     private double zoomAcc;
+    
+    private boolean modoOrtho;
     
     private final Timer timer;
     public static final int DELAY = 17;
@@ -90,7 +88,7 @@ public class ControleDesenho implements ActionListener {
         }
         
         if (desenhando){
-            fAtual.setDistancia(mouseX, mouseY);
+            formaDesenhando.setDistancia(mouseX, mouseY, modoOrtho);
         }
         
         tela.atualizarGUI();
@@ -101,7 +99,7 @@ public class ControleDesenho implements ActionListener {
         g.setColor(Color.WHITE);
         
         if (desenhando){
-            fAtual.desenhar(g);
+            formaDesenhando.desenhar(g);
         }
         
         for (Forma forma : formas) {
@@ -136,27 +134,7 @@ public class ControleDesenho implements ActionListener {
         g.setStroke(original);
     }
     
-    public void cancelarForma(){
-        desenhando = false;
-        fAtual = null;
-    }
-    
-    public void deletarSelecionado(){
-        for (int i = formas.size()-1; i >= 0; i--) {
-            if (formas.get(i).estaSelecionada()){
-                formas.remove(i);
-            }
-        }
-    }
-    
-    public void zoom(int z, int posX, int posY){
-        double zoom;
-        if (z < 0){
-            zoom = FATOR_ZOOM_IN;
-        } else {
-            zoom = FATOR_ZOOM_OUT;
-        }
-        
+    private void zoom(double zoom, int posX, int posY){
         if (zoomAcc*zoom > ZOOM_MAX || zoomAcc*zoom < 1/ZOOM_MAX){
             return;
         }
@@ -168,11 +146,19 @@ public class ControleDesenho implements ActionListener {
             forma.escala(zoom, zoom, referencia);
         }
         if (desenhando){
-            fAtual.escala(zoom, zoom, referencia);
+            formaDesenhando.escala(zoom, zoom, referencia);
         }
         if (rectSelecao != null){
             rectSelecao.escala(zoom, zoom, referencia);
         }
+    }
+    
+    public void zoomIn(int posX, int posY){
+        zoom(FATOR_ZOOM_IN, posX, posY);
+    }
+    
+    public void zoomOut(int posX, int posY){
+        zoom(FATOR_ZOOM_OUT, posX, posY);
     }
     
     public void pan(){
@@ -183,10 +169,50 @@ public class ControleDesenho implements ActionListener {
             forma.translacao(dx, dy);
         }
         if (desenhando){
-            fAtual.translacao(dx, dy);
+            formaDesenhando.translacao(dx, dy);
         }
         if (rectSelecao != null){
             rectSelecao.translacao(dx, dy);
+        }
+    }
+    
+    public void cancelarForma(){
+        desenhando = false;
+        formaDesenhando = null;
+    }
+    
+    public void deletarSelecionado(){
+        for (int i = formas.size()-1; i >= 0; i--) {
+            if (formas.get(i).estaSelecionada()){
+                formas.remove(i);
+            }
+        }
+        rectSelecao = null;
+    }
+    
+    public void ativarModoOrtho(){
+        modoOrtho = true;
+    }
+    
+    public void desativarModoOrtho(){
+        modoOrtho = false;
+    }
+    
+    public void ferramentaMover(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há formas selecionadas.");
+        }
+    }
+    
+    public void ferramentaEscala(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há formas selecionadas.");
+        }
+    }
+    
+    public void ferramentaRotacao(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há formas selecionadas.");
         }
     }
     
@@ -195,20 +221,30 @@ public class ControleDesenho implements ActionListener {
         atualizar();
     }
     
-    private void criaForma() {
+    private void criarForma() {
+        if (!desenhando) {
+            switch (tela.getFormaSelecionada()){
+                case "Linha":
+                    formaDesenhando = new Linha(mouseX, mouseY, mouseX, mouseY);
+                    break;
+                case "Retângulo":
+                    formaDesenhando = new Retangulo(mouseX, mouseY, 1, 1);
+                    break;
+                case "Circulo":
+                    formaDesenhando = new Circulo(mouseX, mouseY, mouseX, mouseY);
+                    break;
+            }
+        } else {
+            formas.add(formaDesenhando);
+        }
+        desenhando = !desenhando;
     }
     
     public void mouseClick(int posX, int posY, int botao) {
         switch (botao) {
             case MouseInput.BOTAO_ESQUERDO:
                 rectSelecao = null;
-                if (!desenhando){
-                    //fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
-                    fAtual = new Retangulo(mouseX, mouseY, 1, 1);
-                } else {
-                    formas.add(fAtual);
-                }   
-                desenhando = !desenhando;
+                criarForma();
                 break;
             case MouseInput.BOTAO_MEIO:
                 panning = true;
@@ -217,8 +253,6 @@ public class ControleDesenho implements ActionListener {
                 painelDesenho.setPan(panning);
                 break;
             case MouseInput.BOTAO_DIREITO:
-                mouseX_click = mouseX;
-                mouseY_click = mouseY;
                 selecionando = true;
                 rectSelecao = new Retangulo(mouseX, mouseY, 1, 1);
                 break;
@@ -242,9 +276,8 @@ public class ControleDesenho implements ActionListener {
             mouseX_anterior = mouseX;
             mouseY_anterior = mouseY;
         } else if (selecionando){
-            rectSelecao.setDistancia(posX, posY);
+            rectSelecao.setDistancia(posX, posY, modoOrtho);
         }
-        
     }
     
     public void moverMouse(int x, int y){
@@ -258,10 +291,6 @@ public class ControleDesenho implements ActionListener {
 
     public int getMouseY() {
         return mouseY;
-    }
-
-    public void setFormaAtual(String formaAtual) {
-        this.formaAtual = formaAtual;
     }
     
     public Rectangle2D getRectProximidade(double x, double y){

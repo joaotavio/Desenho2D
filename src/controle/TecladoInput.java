@@ -23,12 +23,19 @@ public class TecladoInput implements KeyListener{
             case KeyEvent.VK_DELETE:
                 controleDesenho.deletarSelecionado();
                 break;
+            case KeyEvent.VK_SHIFT:
+                controleDesenho.ativarModoOrtho();
+                break;
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        
+        switch(e.getKeyCode()){
+            case KeyEvent.VK_SHIFT:
+                controleDesenho.desativarModoOrtho();
+                break;
+        }
     }
     
 }

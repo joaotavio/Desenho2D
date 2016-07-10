@@ -49,7 +49,11 @@ public class MouseInput implements MouseListener, MouseMotionListener, MouseWhee
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        controleDesenho.zoom(e.getUnitsToScroll(), e.getX(), e.getY());
+        if (e.getUnitsToScroll() < 0){
+            controleDesenho.zoomIn(e.getX(), e.getY());
+        } else {
+            controleDesenho.zoomOut(e.getX(), e.getY());
+        }
     }
     
 }

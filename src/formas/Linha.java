@@ -4,19 +4,17 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
 public class Linha extends Forma{
 
     private final Line2D linha;
     
-    private boolean mouseOver;
-    private boolean selecionada;
-    
     public Linha(double x1, double y1, double x2, double y2){
         super();
+        pontoFixo.setLocation(x1, y1);
         linha = new Line2D.Double(x1, y1, x2, y2);
+        forma = linha;
     }
 
     @Override
@@ -32,12 +30,17 @@ public class Linha extends Forma{
     }
     
     @Override
-    public void atualizar(int mouseX, int mouseY) {
-        mouseOver = linha.intersects(mouseX-5, mouseY-5, 10, 10);
-    }
-    
-    @Override
-    public void setDistancia(int x, int y) {
+    public void setDistancia(int x, int y, boolean modoOrtho) {
+        if (modoOrtho){
+            double difX = Math.abs(linha.getX1() - x);
+            double difY = Math.abs(linha.getY1() - y);
+            if (difX > difY){
+                y = (int)linha.getY1();
+            } else {
+                x = (int)linha.getX1();
+            }
+        }
+
         linha.setLine(linha.getX1(), linha.getY1(), x, y);
     }
 
@@ -54,24 +57,6 @@ public class Linha extends Forma{
         pontos.add(linha.getP1());
         pontos.add(linha.getP2());
         return pontos;
-    }
-
-    @Override
-    public boolean estaSelecionada() {
-        return selecionada;
-    }
-    
-    @Override
-    public void setSelecionada(boolean s){
-        selecionada = s;
-    }
-
-    @Override
-    public boolean intersecao(Rectangle2D r) {
-        if (r == null){
-            return false;
-        }
-        return linha.intersects(r);
     }
 
 }
