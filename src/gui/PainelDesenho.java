@@ -25,6 +25,7 @@ public class PainelDesenho extends JPanel {
         this.addMouseListener(controleDesenho.getMouseInput());
         this.addMouseMotionListener(controleDesenho.getMouseInput());
         this.addMouseWheelListener(controleDesenho.getMouseInput());
+        this.addKeyListener(controleDesenho.getTecladoInput());
     }
     
     public void atualizar(){

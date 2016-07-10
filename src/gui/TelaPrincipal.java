@@ -70,6 +70,7 @@ public class TelaPrincipal {
         frame.setVisible(true);
         frame.pack();
         frame.setLocationRelativeTo(null);
+        painelDesenho.requestFocus();
     }
     
     private void iniciarMenu(){

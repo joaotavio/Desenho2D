@@ -19,7 +19,8 @@ public class ControleDesenho implements ActionListener {
     
     private final TelaPrincipal tela;
     private final PainelDesenho painelDesenho;
-    private final MouseInput controleInput;
+    private final MouseInput mouseInput;
+    private final TecladoInput tecladoInput;
     
     private int mouseX;
     private int mouseY;
@@ -53,7 +54,8 @@ public class ControleDesenho implements ActionListener {
 
     public ControleDesenho() {
         formas = new ArrayList<>();
-        controleInput = new MouseInput(this);
+        mouseInput = new MouseInput(this);
+        tecladoInput = new TecladoInput(this);
         painelDesenho = new PainelDesenho(this);
         tela = new TelaPrincipal(this, painelDesenho);
         zoomAcc = 1;
@@ -127,6 +129,19 @@ public class ControleDesenho implements ActionListener {
         g.setStroke(original);
     }
     
+    public void cancelarForma(){
+        desenhando = false;
+        fAtual = null;
+    }
+    
+    public void deletarSelecionado(){
+        for (int i = formas.size()-1; i >= 0; i--) {
+            if (formas.get(i).estaSelecionada()){
+                formas.remove(i);
+            }
+        }
+    }
+    
     public void zoom(int z, int posX, int posY){
         double zoom;
         if (z < 0){
@@ -160,6 +175,9 @@ public class ControleDesenho implements ActionListener {
         if (desenhando){
             fAtual.translacao(dx, dy);
         }
+        if (rectSelecao != null){
+            //ZOOM E PAN FAZER FORMA RETANGULO
+        }
     }
     
     @Override
@@ -171,14 +189,15 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void mouseClick(int posX, int posY, int botao) {
-        rectSelecao = null;
         switch (botao) {
             case MouseInput.BOTAO_ESQUERDO:
+                rectSelecao = null;
                 if (!desenhando){
                     fAtual = new Linha(mouseX, mouseY, mouseX, mouseY);
                 } else {
                     formas.add(fAtual);
-                }   desenhando = !desenhando;
+                }   
+                desenhando = !desenhando;
                 break;
             case MouseInput.BOTAO_MEIO:
                 pan = true;
@@ -251,7 +270,11 @@ public class ControleDesenho implements ActionListener {
     }
 
     public MouseInput getMouseInput() {
-        return controleInput;
+        return mouseInput;
+    }
+
+    public TecladoInput getTecladoInput() {
+        return tecladoInput;
     }
 
     public boolean isPan() {
