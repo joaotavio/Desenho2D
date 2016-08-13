@@ -14,6 +14,8 @@ public abstract class Forma {
     protected boolean mouseOver;
     protected boolean selecionada;
     
+    // fazer cor selecionada etc.
+    
     public Forma() {
         pontoFixo = new Point2D.Double();
     }

@@ -6,7 +6,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
-public class Circulo extends Forma{
+public class Circulo extends Forma {
     
     private final Ellipse2D circulo;
     
@@ -32,20 +32,20 @@ public class Circulo extends Forma{
 
     @Override
     public void setDistancia(int posX, int posY, boolean modoOrtho) {
-        double x = Math.min(pontoFixo.getX(), posX);
-        double y = Math.min(pontoFixo.getY(), posY);
-        double largura = Math.abs(posX - pontoFixo.getX());
-        double altura = Math.abs(posY - pontoFixo.getY());
+        double x = posX;
+        double y = posY;
         
-        if (modoOrtho){
-            if (largura < altura){
-                altura = largura;
+        if (modoOrtho) {
+            double varX = Math.abs(pontoFixo.getX() - x); // Variação de X
+            double varY = Math.abs(pontoFixo.getY() - y); // Variação de Y
+            if (varX < varY){
+                x = pontoFixo.getX()+varY;
             } else {
-                largura = altura;
+                y = pontoFixo.getY()+varX;
             }
         }
         
-        circulo.setFrame(x, y, largura, altura);
+        circulo.setFrameFromCenter(pontoFixo.getX(), pontoFixo.getY(), x, y);
     }
 
     @Override

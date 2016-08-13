@@ -50,6 +50,8 @@ public class ControleDesenho implements ActionListener {
     
     private final Timer timer;
     public static final int DELAY = 17;
+    
+    // fazer desenharGrid aqui
 
     public ControleDesenho() {
         formas = new ArrayList<>();

@@ -2,14 +2,13 @@ package formas;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Polygon;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 
-public class Retangulo extends Forma{
+public class Retangulo extends Forma {
     
-    private Polygon ret;
+    private final Rectangle2D rect;
     private final ArrayList<Point2D> pontos;
     
     private boolean fill;
@@ -20,27 +19,22 @@ public class Retangulo extends Forma{
         super();
         pontoFixo.setLocation(x1, y1);
         cor = Color.WHITE;
+        
         pontos = new ArrayList<>(4);
         pontos.add(new Point2D.Double(x1, y1));
         pontos.add(new Point2D.Double(x1+largura, y1));
         pontos.add(new Point2D.Double(x1+largura, y1+altura));
         pontos.add(new Point2D.Double(x1, y1+altura));
         
-        setPoligono();
-    }
-    
-    private void setPoligono() {
-        int[] x = {(int)pontos.get(0).getX(), (int)pontos.get(1).getX(), (int)pontos.get(2).getX(), (int)pontos.get(3).getX()};
-        int[] y = {(int)pontos.get(0).getY(), (int)pontos.get(1).getY(), (int)pontos.get(2).getY(), (int)pontos.get(3).getY()};
-        ret = new Polygon(x, y, pontos.size());
-        forma = ret;
+        rect = new Rectangle2D.Double(x1, y1, largura, altura);
+        forma = rect;
     }
     
     private void setPontos(double x, double y, double largura, double altura) {
         pontos.get(0).setLocation(x, y);
         pontos.get(1).setLocation(x+largura, y);
-        pontos.get(2).setLocation(x+largura, y+altura);
-        pontos.get(3).setLocation(x, y+altura);
+        pontos.get(2).setLocation(x, y+altura);
+        pontos.get(3).setLocation(x+largura, y+altura);
     }
 
     @Override
@@ -53,34 +47,45 @@ public class Retangulo extends Forma{
             g.setColor(cor);
         }
         if (fill){
-            g.fill(ret);
+            g.fill(rect);
         } else {
-            g.draw(ret);
+            g.draw(rect);
         }
     }
 
     @Override
     public void setDistancia(int posX, int posY, boolean modoOrtho) {
-        double x = Math.min(pontoFixo.getX(), posX);
-        double y = Math.min(pontoFixo.getY(), posY);
-        double largura = Math.abs(posX - pontoFixo.getX());
-        double altura = Math.abs(posY - pontoFixo.getY());
+        double x = posX;
+        double y = posY;
         
-        if (modoOrtho){
-            if (largura < altura){
-                altura = largura;
+        if (modoOrtho) {
+            double largura = Math.abs(pontoFixo.getX() - x);
+            double altura = Math.abs(pontoFixo.getY() - y);
+            
+            if (largura > altura){
+                if (pontoFixo.getX() < x)
+                    x = pontoFixo.getX() + altura;
+                else
+                    x = pontoFixo.getX() - altura;
             } else {
-                largura = altura;
+                if (pontoFixo.getY() < y)
+                    y = pontoFixo.getY() + largura;
+                else 
+                    y = pontoFixo.getY() - largura;
             }
         }
         
-        setPontos(x, y, largura, altura);
-        setPoligono();
+        rect.setFrameFromDiagonal(pontoFixo.getX(), pontoFixo.getY(), x, y);
+        setPontos(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
     }
 
     @Override
     protected void setForma(ArrayList<Point2D> pontos) {
-        setPoligono();
+        double x = pontos.get(0).getX();
+        double y = pontos.get(0).getY();
+        double largura = pontos.get(3).getX() - x;
+        double altura = pontos.get(3).getY() - y;
+        rect.setFrame(x, y, largura, altura);
     }
 
     @Override
@@ -97,6 +102,6 @@ public class Retangulo extends Forma{
     }
     
     public Rectangle2D getRect2D(){
-        return ret.getBounds2D();
+        return rect.getBounds2D();
     }
 }
