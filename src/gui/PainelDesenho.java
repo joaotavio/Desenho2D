@@ -54,10 +54,11 @@ public class PainelDesenho extends JPanel {
     
     private void desenharGrid(Graphics2D g){
         g.setColor(COR_BACKGROUND.brighter());
-        for (int i = 0; i < this.getWidth(); i+=50) {
+        int tam_grid = (int)(50*controleDesenho.getZoomAcc());
+        for (int i = 0; i < this.getWidth(); i+=tam_grid) {
             g.drawLine(i, 0, i, this.getHeight());
         }
-        for (int i = 0; i < this.getWidth(); i+=50) {
+        for (int i = 0; i < this.getWidth(); i+=tam_grid) {
             g.drawLine(0, i, this.getWidth(), i);
         }
     }

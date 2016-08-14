@@ -1,5 +1,6 @@
 package formas;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.geom.Point2D;
@@ -8,16 +9,22 @@ import java.util.ArrayList;
 
 public abstract class Forma {
     
+    public static final Color COR_PADRAO = Color.WHITE;
+    public static final Color COR_SELECIONADA = Color.YELLOW;
+    public static final Color COR_MOUSE_OVER = Color.CYAN.darker();
+    
     protected Shape forma;
+    protected Color cor = COR_PADRAO;
+    protected boolean fill;
+    
     protected Point2D pontoFixo;
     
     protected boolean mouseOver;
     protected boolean selecionada;
     
-    // fazer cor selecionada etc.
-    
     public Forma() {
         pontoFixo = new Point2D.Double();
+        fill = false;
     }
     
     public void translacao(double dx, double dy){
@@ -64,6 +71,14 @@ public abstract class Forma {
             return false;
         }
         return forma.intersects(r);
+    }
+    
+    public void setFill(boolean fill) {
+        this.fill = fill;
+    }
+
+    public void setCor(Color cor) {
+        this.cor = cor;
     }
     
     public abstract void desenhar(Graphics2D g);

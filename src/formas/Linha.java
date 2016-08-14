@@ -1,6 +1,5 @@
 package formas;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -20,12 +19,13 @@ public class Linha extends Forma {
     @Override
     public void desenhar(Graphics2D g) {
         if (selecionada){
-            g.setColor(Color.YELLOW);
+            g.setColor(COR_SELECIONADA);
         } else if (mouseOver) {
-            g.setColor(Color.CYAN.darker());
+            g.setColor(COR_MOUSE_OVER);
         } else {
-            g.setColor(Color.WHITE);
+            g.setColor(cor);
         }
+        
         g.draw(linha);
     }
     

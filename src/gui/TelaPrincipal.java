@@ -3,11 +3,16 @@ package gui;
 import controle.ControleDesenho;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -94,21 +99,43 @@ public class TelaPrincipal {
         
         JMenuItem sair = new JMenuItem("Sair");
         JMenuItem sobre = new JMenuItem("Sobre");
+        JMenuItem comandos = new JMenuItem("Comandos");
         
         arquivo.add(sair);
+        ajuda.add(comandos);
+        ajuda.addSeparator();
         ajuda.add(sobre);
+        
+        sair.addActionListener(new AcaoMenuSair());
+        sobre.addActionListener(new TelaSobre(frame));
+        comandos.addActionListener(new TelaComandos(frame));
+    }
+    
+    private Image getScaledImage(Image srcImg, int w, int h){
+        BufferedImage resizedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resizedImg.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(srcImg, 0, 0, w, h, null);
+        g2.dispose();
+        return resizedImg;
     }
     
     private void iniciarToolBar(){
         toolBar = new JToolBar();
         grupoBtn = new ButtonGroup();
         
-        btnLinha = new JToggleButton("Linha");
+        ImageIcon lineIcon = new ImageIcon(getScaledImage(new ImageIcon("images/lineIcon.png").getImage(), 20, 20));
+        ImageIcon rectIcon = new ImageIcon(getScaledImage(new ImageIcon("images/rectIcon.png").getImage(), 25, 20));
+        ImageIcon elipseIcon = new ImageIcon(getScaledImage(new ImageIcon("images/ellipseIcon.png").getImage(), 20, 20));
+        
+        btnLinha = new JToggleButton("Linha", lineIcon);
         btnLinha.setActionCommand("Linha");
-        btnRetangulo = new JToggleButton("Retângulo");
+        btnRetangulo = new JToggleButton("Retângulo", rectIcon);
         btnRetangulo.setActionCommand("Retângulo");
-        btnCirculo = new JToggleButton("Circulo");
+        btnCirculo = new JToggleButton("Elipse", elipseIcon);
         btnCirculo.setActionCommand("Circulo");
+        
         
         grupoBtn.add(btnLinha);
         grupoBtn.add(btnRetangulo);
@@ -123,21 +150,34 @@ public class TelaPrincipal {
         JButton btnMover = new JButton("Mover");
         JButton btnEscala = new JButton("Escala");
         JButton btnRotacao = new JButton("Rotação");
+        
         JButton btnZoomIn = new JButton("Zoom In");
         JButton btnZoomOut = new JButton("Zoom Out");
+        JButton btnZoomExtend = new JButton("Zoom Extend");
+        
+        JButton btnLimpar = new JButton("Limpar");
         
         toolBar.add(Box.createHorizontalGlue());
         toolBar.add(Box.createVerticalGlue());
         toolBar.add(btnMover);
         toolBar.add(btnEscala);
         toolBar.add(btnRotacao);
+        
         toolBar.addSeparator();
         toolBar.add(btnZoomIn);
         toolBar.add(btnZoomOut);
+        toolBar.add(btnZoomExtend);
+        
+        toolBar.addSeparator();
+        toolBar.add(btnLimpar);
         
         btnMover.addActionListener(new AcaoBotaoMover());
         btnEscala.addActionListener(new AcaoBotaoEscala());
         btnRotacao.addActionListener(new AcaoBotaoRotacao());
+        btnZoomIn.addActionListener(new AcaoBotaoZoomIn());
+        btnZoomOut.addActionListener(new AcaoBotaoZoomOut());
+        btnZoomExtend.addActionListener(new AcaoBotaoZoomExtend());
+        btnLimpar.addActionListener(new AcaoBotaoLimpar());
         
         painelPrincipal.add(toolBar, BorderLayout.PAGE_START);
     }
@@ -185,6 +225,8 @@ public class TelaPrincipal {
         return grupoBtn.getSelection().getActionCommand();
     }
     
+    /* Ações Botões */
+    
     private class AcaoBotaoMover implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -203,6 +245,44 @@ public class TelaPrincipal {
         @Override
         public void actionPerformed(ActionEvent e) {
             controleDesenho.ferramentaRotacao();
+        }
+    }
+    
+    private class AcaoBotaoZoomIn implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controleDesenho.zoomIn();
+        }
+    }
+    
+    private class AcaoBotaoZoomOut implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controleDesenho.zoomOut();
+        }
+    }
+    
+    private class AcaoBotaoZoomExtend implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controleDesenho.zoomExtend();
+        }
+    }
+    
+    private class AcaoBotaoLimpar implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controleDesenho.limpar();
+        }
+    }
+    
+    /* Ações do Menu */
+    
+    private class AcaoMenuSair implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            frame.dispose();
+            System.exit(0);
         }
     }
     

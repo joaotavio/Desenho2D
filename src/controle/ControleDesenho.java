@@ -35,7 +35,7 @@ public class ControleDesenho implements ActionListener {
     private int mouseX_anterior;
     private int mouseY_anterior;
     
-    private final ArrayList<Forma> formas;
+    private ArrayList<Forma> formas;
     private Forma formaDesenhando;
     
     public static final int PROXIMIDADE = 15;
@@ -43,7 +43,7 @@ public class ControleDesenho implements ActionListener {
     
     public static final double FATOR_ZOOM_IN = 1.5;
     public static final double FATOR_ZOOM_OUT = 0.66666667;
-    public static final double ZOOM_MAX = 50;
+    public static final double ZOOM_MAX = 20;
     private double zoomAcc;
     
     private boolean modoOrtho;
@@ -51,7 +51,7 @@ public class ControleDesenho implements ActionListener {
     private final Timer timer;
     public static final int DELAY = 17;
     
-    // fazer desenharGrid aqui
+    // escrever na tela: clique em um ponto
 
     public ControleDesenho() {
         formas = new ArrayList<>();
@@ -137,7 +137,12 @@ public class ControleDesenho implements ActionListener {
     }
     
     private void zoom(double zoom, int posX, int posY){
-        if (zoomAcc*zoom > ZOOM_MAX || zoomAcc*zoom < 1/ZOOM_MAX){
+        if (zoomAcc*zoom > ZOOM_MAX){
+            tela.mostrarMensagem("Zoom in máximo atingido.");
+            return;
+        }
+        if (zoomAcc*zoom < 1/ZOOM_MAX){
+            tela.mostrarMensagem("Zoom out máximo atingido.");
             return;
         }
         
@@ -159,8 +164,20 @@ public class ControleDesenho implements ActionListener {
         zoom(FATOR_ZOOM_IN, posX, posY);
     }
     
+    public void zoomIn(){
+        zoomIn(painelDesenho.getWidth()/2, painelDesenho.getHeight()/2);
+    }
+    
     public void zoomOut(int posX, int posY){
         zoom(FATOR_ZOOM_OUT, posX, posY);
+    }
+    
+    public void zoomOut(){
+        zoomOut(painelDesenho.getWidth()/2, painelDesenho.getHeight()/2);
+    }
+    
+    public void zoomExtend(){
+        
     }
     
     public void pan(){
@@ -189,6 +206,11 @@ public class ControleDesenho implements ActionListener {
                 formas.remove(i);
             }
         }
+        rectSelecao = null;
+    }
+    
+    public void limpar(){
+        formas = new ArrayList<>();
         rectSelecao = null;
     }
     
@@ -317,6 +339,10 @@ public class ControleDesenho implements ActionListener {
 
     public boolean isPanning() {
         return panning;
+    }
+    
+    public double getZoomAcc(){
+        return zoomAcc;
     }
 
 }
