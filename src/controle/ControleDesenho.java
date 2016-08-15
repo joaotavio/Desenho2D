@@ -1,5 +1,7 @@
 package controle;
 
+import controle.ferramentas.Ferramenta;
+import controle.ferramentas.FerramentaEscala;
 import formas.Circulo;
 import formas.Forma;
 import formas.Linha;
@@ -15,6 +17,9 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
 import javax.swing.Timer;
 
 public class ControleDesenho implements ActionListener {
@@ -38,6 +43,8 @@ public class ControleDesenho implements ActionListener {
     private ArrayList<Forma> formas;
     private Forma formaDesenhando;
     
+    private Ferramenta ferramenta;
+    
     public static final int PROXIMIDADE = 15;
     private Point2D pontoProximidade;
     
@@ -50,8 +57,6 @@ public class ControleDesenho implements ActionListener {
     
     private final Timer timer;
     public static final int DELAY = 17;
-    
-    // escrever na tela: clique em um ponto
 
     public ControleDesenho() {
         formas = new ArrayList<>();
@@ -198,6 +203,7 @@ public class ControleDesenho implements ActionListener {
     public void cancelarForma(){
         desenhando = false;
         formaDesenhando = null;
+        rectSelecao = null;
     }
     
     public void deletarSelecionado(){
@@ -222,39 +228,126 @@ public class ControleDesenho implements ActionListener {
         modoOrtho = false;
     }
     
-    public void ferramentaMover(){
-        if (rectSelecao == null){
-            tela.mostrarMensagem("Não há formas selecionadas.");
-        }
-    }
-    
-    public void ferramentaEscala(){
-        if (rectSelecao == null){
-            tela.mostrarMensagem("Não há formas selecionadas.");
-        }
-    }
-    
-    public void ferramentaRotacao(){
-        if (rectSelecao == null){
-            tela.mostrarMensagem("Não há formas selecionadas.");
-        }
-    }
-    
     @Override
     public void actionPerformed(ActionEvent e) {
         atualizar();
     }
     
+    public void ferramentaMover(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há objetos selecionadas.");
+            return;
+        }
+        
+        JTextField dxField = new JTextField();
+        JTextField dyField = new JTextField();
+        dxField.setText("0");
+        dyField.setText("0");
+        Object[] message = {
+            "Deslocament em X:", dxField,
+            "Deslocament em Y:", dyField
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            double dx = Double.valueOf(dxField.getText());
+            double dy = Double.valueOf(dyField.getText());
+            
+            for (Forma forma : getSelecionados()) {
+                forma.translacao(dx, dy);
+            }
+        }
+    }
+    
+    public void ferramentaEscala(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há objetos selecionadas.");
+            return;
+        }
+        
+        JTextField xRefField = new JTextField();
+        JTextField yRefField = new JTextField();
+        JTextField dxField = new JTextField();
+        JTextField dyField = new JTextField();
+        dxField.setText("0");
+        dyField.setText("0");
+        Object[] message = {
+            "X Referência:", xRefField,
+            "Y Referência:", yRefField,
+            "Deslocament em X:", dxField,
+            "Deslocament em Y:", dyField
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            double xRef = Double.valueOf(xRefField.getText());
+            double yRef = Double.valueOf(yRefField.getText());
+            double dx = Double.valueOf(dxField.getText());
+            double dy = Double.valueOf(dyField.getText());
+            
+            for (Forma forma : getSelecionados()) {
+                forma.translacao(dx, dy);
+            }
+        }
+    }
+    
+    public void ferramentaRotacao(){
+        if (rectSelecao == null){
+            tela.mostrarMensagem("Não há objetos selecionadas.");
+            return;
+        }
+        
+        JTextField xRefField = new JTextField();
+        JTextField yRefField = new JTextField();
+        JTextField dxField = new JTextField();
+        JTextField dyField = new JTextField();
+        dxField.setText("0");
+        dyField.setText("0");
+        Object[] message = {
+            "X Referência:", xRefField,
+            "Y Referência:", yRefField,
+            "Deslocament em X:", dxField,
+            "Deslocament em Y:", dyField
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            double xRef = Double.valueOf(xRefField.getText());
+            double yRef = Double.valueOf(yRefField.getText());
+            double dx = Double.valueOf(dxField.getText());
+            double dy = Double.valueOf(dyField.getText());
+            
+            for (Forma forma : getSelecionados()) {
+                forma.translacao(dx, dy);
+            }
+        }
+    }
+    
+    public ArrayList<Forma> getSelecionados(){
+        ArrayList<Forma> selecionados = new ArrayList<>();
+        for (Forma forma : formas) {
+            if (forma.estaSelecionada()){
+                selecionados.add(forma);
+            }
+        }
+        return selecionados;
+    }
+    
+    public void mostrarMensagem(String msg){
+        tela.mostrarMensagem(msg);
+    }
+    
     private void criarForma() {
+        rectSelecao = null;
         if (!desenhando) {
-            switch (tela.getFormaSelecionada()){
-                case "Linha":
+            switch (tela.getFerramentaSelecionada()){
+                case "LINHA":
                     formaDesenhando = new Linha(mouseX, mouseY, mouseX, mouseY);
                     break;
-                case "Retângulo":
+                case "RETANGULO":
                     formaDesenhando = new Retangulo(mouseX, mouseY, 1, 1);
                     break;
-                case "Circulo":
+                case "ELIPSE":
                     formaDesenhando = new Circulo(mouseX, mouseY, mouseX, mouseY);
                     break;
             }
@@ -264,11 +357,46 @@ public class ControleDesenho implements ActionListener {
         desenhando = !desenhando;
     }
     
+    private void ferramentaTransformacao(){
+        /*if (rectSelecao == null){
+            mostrarMensagem("Não há objetos selecionados.");
+            return;
+        }
+        
+        if (ferramenta == null){
+            switch (tela.getFerramentaSelecionada()) {
+                case "MOVER":
+                    break;
+                case "ESCALA":
+                    ferramenta = new FerramentaEscala(this);
+                    break;
+                case "ROTACAO":
+                    break;
+            }
+        }
+        
+        ferramenta.click(mouseX, mouseY);*/
+    }
+    
+    private void acaoFerramenta(){
+        switch (tela.getFerramentaSelecionada()) {
+            case "LINHA":
+            case "RETANGULO":
+            case "ELIPSE":
+                criarForma();
+                break;
+            case "MOVER":
+            case "ESCALA":
+            case "ROTACAO":
+                ferramentaTransformacao();
+                break;
+        }
+    }
+    
     public void mouseClick(int posX, int posY, int botao) {
         switch (botao) {
             case MouseInput.BOTAO_ESQUERDO:
-                rectSelecao = null;
-                criarForma();
+                acaoFerramenta();
                 break;
             case MouseInput.BOTAO_MEIO:
                 panning = true;

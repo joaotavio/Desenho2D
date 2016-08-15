@@ -49,7 +49,11 @@ public class TelaPrincipal {
     private ButtonGroup grupoBtn;
     private JToggleButton btnLinha;
     private JToggleButton btnRetangulo;
-    private JToggleButton btnCirculo;
+    private JToggleButton btnElipse;
+    
+    private JButton btnMover;
+    private JButton btnEscala;
+    private JButton btnRotacao;
     
     private JMenuBar menuBar;
     private JMenu arquivo;
@@ -130,38 +134,47 @@ public class TelaPrincipal {
         ImageIcon elipseIcon = new ImageIcon(getScaledImage(new ImageIcon("images/ellipseIcon.png").getImage(), 20, 20));
         
         btnLinha = new JToggleButton("Linha", lineIcon);
-        btnLinha.setActionCommand("Linha");
-        btnRetangulo = new JToggleButton("Retângulo", rectIcon);
-        btnRetangulo.setActionCommand("Retângulo");
-        btnCirculo = new JToggleButton("Elipse", elipseIcon);
-        btnCirculo.setActionCommand("Circulo");
+        btnLinha.setActionCommand("LINHA");
         
+        btnRetangulo = new JToggleButton("Retângulo", rectIcon);
+        btnRetangulo.setActionCommand("RETANGULO");
+        
+        btnElipse = new JToggleButton("Elipse", elipseIcon);
+        btnElipse.setActionCommand("ELIPSE");
         
         grupoBtn.add(btnLinha);
         grupoBtn.add(btnRetangulo);
-        grupoBtn.add(btnCirculo);
-        
-        toolBar.add(btnLinha);
-        toolBar.add(btnRetangulo);
-        toolBar.add(btnCirculo);
+        grupoBtn.add(btnElipse);
         
         grupoBtn.setSelected(btnLinha.getModel(), true);
         
-        JButton btnMover = new JButton("Mover");
-        JButton btnEscala = new JButton("Escala");
-        JButton btnRotacao = new JButton("Rotação");
+        btnMover = new JButton("Mover");
+        btnMover.setActionCommand("MOVER");
+        
+        btnEscala = new JButton("Escala");
+        btnEscala.setActionCommand("ESCALA");
+        
+        btnRotacao = new JButton("Rotação");
+        btnRotacao.setActionCommand("ROTACAO");
+        
+        //grupoBtn.add(btnMover);
+        //grupoBtn.add(btnEscala);
+        //grupoBtn.add(btnRotacao);
+        
+        toolBar.add(btnLinha);
+        toolBar.add(btnRetangulo);
+        toolBar.add(btnElipse);
+        toolBar.add(Box.createHorizontalGlue());
+        toolBar.add(Box.createVerticalGlue());
+        toolBar.add(btnMover);
+        toolBar.add(btnEscala);
+        toolBar.add(btnRotacao);
         
         JButton btnZoomIn = new JButton("Zoom In");
         JButton btnZoomOut = new JButton("Zoom Out");
         JButton btnZoomExtend = new JButton("Zoom Extend");
         
         JButton btnLimpar = new JButton("Limpar");
-        
-        toolBar.add(Box.createHorizontalGlue());
-        toolBar.add(Box.createVerticalGlue());
-        toolBar.add(btnMover);
-        toolBar.add(btnEscala);
-        toolBar.add(btnRotacao);
         
         toolBar.addSeparator();
         toolBar.add(btnZoomIn);
@@ -220,9 +233,9 @@ public class TelaPrincipal {
         }
     }
     
-    public String getFormaSelecionada(){
+    public String getFerramentaSelecionada(){
         painelDesenho.requestFocus();
-        return grupoBtn.getSelection().getActionCommand();
+        return grupoBtn.getSelection().getActionCommand().toUpperCase();
     }
     
     /* Ações Botões */
