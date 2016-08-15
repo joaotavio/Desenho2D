@@ -101,15 +101,19 @@ public class TelaPrincipal {
         menuBar.add(arquivo);
         menuBar.add(ajuda);
         
+        JMenuItem novo = new JMenuItem("Novo");
         JMenuItem sair = new JMenuItem("Sair");
         JMenuItem sobre = new JMenuItem("Sobre");
         JMenuItem comandos = new JMenuItem("Comandos");
         
+        arquivo.add(novo);
+        arquivo.addSeparator();
         arquivo.add(sair);
         ajuda.add(comandos);
         ajuda.addSeparator();
         ajuda.add(sobre);
         
+        novo.addActionListener(new AcaoMenuNovo());
         sair.addActionListener(new AcaoMenuSair());
         sobre.addActionListener(new TelaSobre(frame));
         comandos.addActionListener(new TelaComandos(frame));
@@ -297,6 +301,14 @@ public class TelaPrincipal {
             frame.dispose();
             System.exit(0);
         }
+    }
+    
+    private class AcaoMenuNovo implements ActionListener{
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            controleDesenho.limpar();
+        }
+        
     }
     
 }

@@ -235,7 +235,7 @@ public class ControleDesenho implements ActionListener {
     
     public void ferramentaMover(){
         if (rectSelecao == null){
-            tela.mostrarMensagem("Não há objetos selecionadas.");
+            tela.mostrarMensagem("Não há objetos selecionados.");
             return;
         }
         
@@ -244,8 +244,8 @@ public class ControleDesenho implements ActionListener {
         dxField.setText("0");
         dyField.setText("0");
         Object[] message = {
-            "Deslocament em X:", dxField,
-            "Deslocament em Y:", dyField
+            "Deslocamento em X:", dxField,
+            "Deslocamento em Y:", dyField
         };
 
         int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
@@ -261,64 +261,62 @@ public class ControleDesenho implements ActionListener {
     
     public void ferramentaEscala(){
         if (rectSelecao == null){
-            tela.mostrarMensagem("Não há objetos selecionadas.");
+            tela.mostrarMensagem("Não há objetos selecionados.");
             return;
         }
         
         JTextField xRefField = new JTextField();
         JTextField yRefField = new JTextField();
-        JTextField dxField = new JTextField();
-        JTextField dyField = new JTextField();
-        dxField.setText("0");
-        dyField.setText("0");
+        JTextField sxField = new JTextField();
+        JTextField syField = new JTextField();
+        sxField.setText("0");
+        syField.setText("0");
         Object[] message = {
             "X Referência:", xRefField,
             "Y Referência:", yRefField,
-            "Deslocament em X:", dxField,
-            "Deslocament em Y:", dyField
+            "Mudança de Escala em X:", sxField,
+            "Mudança de Escala em Y:", syField
         };
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Escala", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             double xRef = Double.valueOf(xRefField.getText());
             double yRef = Double.valueOf(yRefField.getText());
-            double dx = Double.valueOf(dxField.getText());
-            double dy = Double.valueOf(dyField.getText());
+            double sx = Double.valueOf(sxField.getText());
+            double sy = Double.valueOf(syField.getText());
+            
+            Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             
             for (Forma forma : getSelecionados()) {
-                forma.translacao(dx, dy);
+                forma.escala(sx, sy, referencia);
             }
         }
     }
     
     public void ferramentaRotacao(){
         if (rectSelecao == null){
-            tela.mostrarMensagem("Não há objetos selecionadas.");
+            tela.mostrarMensagem("Não há objetos selecionados.");
             return;
         }
         
         JTextField xRefField = new JTextField();
         JTextField yRefField = new JTextField();
-        JTextField dxField = new JTextField();
-        JTextField dyField = new JTextField();
-        dxField.setText("0");
-        dyField.setText("0");
+        JTextField alphaField = new JTextField();
+        alphaField.setText("0");
         Object[] message = {
             "X Referência:", xRefField,
             "Y Referência:", yRefField,
-            "Deslocament em X:", dxField,
-            "Deslocament em Y:", dyField
+            "Ângulo de Rotacao (em graus):", alphaField
         };
 
-        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
+        int option = JOptionPane.showConfirmDialog(null, message, "Rotação", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             double xRef = Double.valueOf(xRefField.getText());
             double yRef = Double.valueOf(yRefField.getText());
-            double dx = Double.valueOf(dxField.getText());
-            double dy = Double.valueOf(dyField.getText());
-            
+            double alpha = Double.valueOf(alphaField.getText());
+            Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             for (Forma forma : getSelecionados()) {
-                forma.translacao(dx, dy);
+                forma.rotacao(alpha, referencia);
             }
         }
     }
