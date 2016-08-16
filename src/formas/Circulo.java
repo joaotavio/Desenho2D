@@ -1,6 +1,7 @@
 package formas;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -9,12 +10,36 @@ public class Circulo extends Forma {
     
     private final Ellipse2D circulo;
     
+    private double angulo;
+    private Point2D pontoRef;
+    
     public Circulo(double x1, double y1, double x2, double y2){
         super();
+        angulo = 0;
         pontoFixo.setLocation(x1, y1);
         circulo = new Ellipse2D.Double();
         circulo.setFrameFromDiagonal(x1, y1, x2, y2);
         forma = circulo;
+    }
+    
+    @Override
+    public void translacao(double dx, double dy){
+        super.translacao(dx, dy);
+        if (pontoRef != null)
+            pontoRef.setLocation(Transformacao2D.translacao(pontoRef, dx, dy));
+    }
+    
+    @Override
+    public void escala(double sx, double sy, Point2D ref){
+        super.escala(sx, sy, ref);
+        if (pontoRef != null)
+            pontoRef.setLocation(Transformacao2D.escala(pontoRef, ref, sx, sy));
+    }
+    
+    @Override
+    public void rotacao(double theta, Point2D ref){
+        angulo += theta;
+        pontoRef = ref;
     }
 
     @Override
@@ -27,7 +52,14 @@ public class Circulo extends Forma {
             g.setColor(cor);
         }
         
-        g.draw(circulo);
+        if (pontoRef == null) {
+            g.draw(circulo);
+        } else {
+            AffineTransform old = g.getTransform();
+            g.rotate(Math.toRadians(angulo), pontoRef.getX(), pontoRef.getY());
+            g.draw(circulo);
+            g.setTransform(old);
+        }
     }
 
     @Override

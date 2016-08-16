@@ -256,6 +256,7 @@ public class ControleDesenho implements ActionListener {
             for (Forma forma : getSelecionados()) {
                 forma.translacao(dx, dy);
             }
+            rectSelecao = null;
         }
     }
     
@@ -269,6 +270,8 @@ public class ControleDesenho implements ActionListener {
         JTextField yRefField = new JTextField();
         JTextField sxField = new JTextField();
         JTextField syField = new JTextField();
+        xRefField.setText("0");
+        yRefField.setText("0");
         sxField.setText("0");
         syField.setText("0");
         Object[] message = {
@@ -290,6 +293,7 @@ public class ControleDesenho implements ActionListener {
             for (Forma forma : getSelecionados()) {
                 forma.escala(sx, sy, referencia);
             }
+            rectSelecao = null;
         }
     }
     
@@ -301,23 +305,26 @@ public class ControleDesenho implements ActionListener {
         
         JTextField xRefField = new JTextField();
         JTextField yRefField = new JTextField();
-        JTextField alphaField = new JTextField();
-        alphaField.setText("0");
+        JTextField thetaField = new JTextField();
+        xRefField.setText("0");
+        yRefField.setText("0");
+        thetaField.setText("0");
         Object[] message = {
             "X Referência:", xRefField,
             "Y Referência:", yRefField,
-            "Ângulo de Rotacao (em graus):", alphaField
+            "Ângulo de Rotação (em graus):", thetaField
         };
 
         int option = JOptionPane.showConfirmDialog(null, message, "Rotação", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             double xRef = Double.valueOf(xRefField.getText());
             double yRef = Double.valueOf(yRefField.getText());
-            double alpha = Double.valueOf(alphaField.getText());
+            double alpha = Double.valueOf(thetaField.getText());
             Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             for (Forma forma : getSelecionados()) {
                 forma.rotacao(alpha, referencia);
             }
+            rectSelecao = null;
         }
     }
     
