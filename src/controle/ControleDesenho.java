@@ -1,7 +1,6 @@
 package controle;
 
 import controle.ferramentas.Ferramenta;
-import controle.ferramentas.FerramentaEscala;
 import formas.Circulo;
 import formas.Forma;
 import formas.Linha;
@@ -18,7 +17,6 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.Timer;
 
@@ -198,6 +196,7 @@ public class ControleDesenho implements ActionListener {
         if (rectSelecao != null){
             rectSelecao.translacao(dx, dy);
         }
+        painelDesenho.pan(dx, dy);
     }
     
     public void cancelarForma(){
