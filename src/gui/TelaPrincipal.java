@@ -28,9 +28,6 @@ public class TelaPrincipal {
     
     public static final String TITULO = "Desenho 2D";
     
-    public static final int LARGURA = 980;
-    public static final int ALTURA = 640;
-    
     public static final int LARGURA_MIN = 640;
     public static final int ALTURA_MIN = 480;
     
@@ -73,7 +70,7 @@ public class TelaPrincipal {
         frame = new JFrame();
         frame.setTitle(TITULO);
         frame.setMinimumSize(new Dimension(LARGURA_MIN, ALTURA_MIN));
-        frame.setPreferredSize(new Dimension(LARGURA, ALTURA));
+        //frame.setPreferredSize(new Dimension(LARGURA, ALTURA));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         painelPrincipal = new JPanel(new BorderLayout());
@@ -204,7 +201,7 @@ public class TelaPrincipal {
         statusBar.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
         
         labelMsg = new JLabel("");
-        labelStatus = new JLabel("X: 0 - Y: 0");
+        labelStatus = new JLabel("(X: 0, Y: 0) (U: 0, V: 0)");
         statusBar.add(labelStatus, BorderLayout.LINE_END);
         statusBar.add(labelMsg, BorderLayout.LINE_START);
         painelPrincipal.add(statusBar, BorderLayout.PAGE_END);
@@ -219,8 +216,9 @@ public class TelaPrincipal {
         });*/
     }
     
-    private void atualizarStatusLabel(int x, int y){
-        labelStatus.setText("X: " + x + " - Y: " + y);
+    private void atualizarStatusLabel(double u, double v, double x, double y){
+        String strXY = String.format("(X: %.3f, Y: %.3f)", x, y);
+        labelStatus.setText(strXY+"    (U: " + u + ", V: " + v+")");
     }
     
     public void mostrarMensagem(String msg){
@@ -229,7 +227,8 @@ public class TelaPrincipal {
     }
     
     public void atualizarGUI(){
-        atualizarStatusLabel(controleDesenho.getMouseX(), controleDesenho.getMouseY());
+        atualizarStatusLabel(controleDesenho.getMouseX(), controleDesenho.getMouseY(), 
+                controleDesenho.getMouseX_janela(), controleDesenho.getMouseY_janela());
         
         if (tempoMsg < System.currentTimeMillis()){
             labelMsg.setText("");
