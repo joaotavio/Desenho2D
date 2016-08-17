@@ -54,6 +54,17 @@ public abstract class Forma {
         setForma(pontos);
     }
     
+    public Forma janelaViewport(Point2D jan_min, Point2D jan_max, Point2D view_min, Point2D view_max){
+        Forma nova = this.criarCopia();
+        ArrayList<Point2D> pontos = nova.getPontos();
+        for (Point2D ponto : pontos) {
+            ponto.setLocation(Transformacao2D.janelaViewport(jan_min, jan_max, view_min, view_max, ponto));
+        }
+        nova.pontoFixo.setLocation(Transformacao2D.janelaViewport(jan_min, jan_max, view_min, view_max, nova.pontoFixo));
+        nova.setForma(pontos);
+        return nova;
+    }
+    
     public void atualizar(int mouseX, int mouseY) {
         mouseOver = forma.intersects(mouseX-5, mouseY-5, 10, 10);
     }
@@ -85,5 +96,6 @@ public abstract class Forma {
     public abstract void setDistancia(int x, int y, boolean modoOrtho);
     protected abstract void setForma(ArrayList<Point2D> pontos);
     public abstract ArrayList<Point2D> getPontos();
+    public abstract Forma criarCopia();
     
 }

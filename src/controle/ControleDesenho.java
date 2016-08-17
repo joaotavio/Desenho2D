@@ -18,7 +18,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
 
 public class ControleDesenho implements ActionListener {
@@ -57,10 +59,7 @@ public class ControleDesenho implements ActionListener {
     private final Timer timer;
     public static final int DELAY = 17;
     
-    private double janelaX_min = 0;
-    private double janelaY_min = 0;
-    private double janelaX_max = PainelDesenho.LARGURA;
-    private double janelaY_max = PainelDesenho.ALTURA;
+    private final Janela janela;
 
     public ControleDesenho() {
         formas = new ArrayList<>();
@@ -68,6 +67,7 @@ public class ControleDesenho implements ActionListener {
         tecladoInput = new TecladoInput(this);
         painelDesenho = new PainelDesenho(this);
         tela = new TelaPrincipal(this, painelDesenho);
+        janela = new Janela();
         zoomAcc = 1;
         
         timer = new Timer(DELAY, this);
@@ -77,14 +77,10 @@ public class ControleDesenho implements ActionListener {
     }
     
     private void pedirTamanhoJanela(){
-        JTextField xMinField = new JTextField();
-        JTextField yMinField = new JTextField();
-        JTextField xMaxField = new JTextField();
-        JTextField yMaxField = new JTextField();
-        xMinField.setText("0");
-        yMinField.setText("0");
-        xMaxField.setText(String.valueOf(PainelDesenho.LARGURA));
-        yMaxField.setText(String.valueOf(PainelDesenho.ALTURA));
+        JSpinner xMinField = new JSpinner(new SpinnerNumberModel(janela.getXmin(), 0, 2000, 1));
+        JSpinner yMinField = new JSpinner(new SpinnerNumberModel(janela.getYmin(), 0, 2000, 1));
+        JSpinner xMaxField = new JSpinner(new SpinnerNumberModel(janela.getXmax(), 0, 2000, 1));
+        JSpinner yMaxField = new JSpinner(new SpinnerNumberModel(janela.getYmax(), 0, 2000, 1));
         Object[] message = {
             "X Mínimo da Janela:", xMinField,
             "Y Mínimo da Janela:", yMinField,
@@ -94,16 +90,17 @@ public class ControleDesenho implements ActionListener {
 
         int option = JOptionPane.showConfirmDialog(null, message, "Definir Janela", JOptionPane.DEFAULT_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            janelaX_min = Double.valueOf(xMinField.getText());
-            janelaY_min = Double.valueOf(yMinField.getText());
-            janelaX_max = Double.valueOf(xMaxField.getText());
-            janelaY_max = Double.valueOf(yMaxField.getText());
+            double janelaX_min = (double)xMinField.getValue();
+            double janelaY_min = (double)yMinField.getValue();
+            double janelaX_max = (double)xMaxField.getValue();
+            double janelaY_max = (double)yMaxField.getValue();
+            janela.setJanela(janelaX_min, janelaY_min, janelaX_max, janelaY_max);
         }
     }
     
     private Point2D janelaViewport(Point2D p){
-        Point2D jan_min = new Point2D.Double(janelaX_min, janelaY_min);
-        Point2D jan_max = new Point2D.Double(janelaX_max, janelaY_max);
+        Point2D jan_min = new Point2D.Double(janela.getXmin(), janela.getYmin());
+        Point2D jan_max = new Point2D.Double(janela.getXmax(), janela.getYmax());
         Point2D view_min = new Point2D.Double(0, 0);
         Point2D view_max = new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
         Point2D novoP = Transformacao2D.janelaViewport(jan_min, jan_max, view_min, view_max, p);
@@ -111,8 +108,8 @@ public class ControleDesenho implements ActionListener {
     }
     
     private Point2D viewportJanela(Point2D p){
-        Point2D jan_min = new Point2D.Double(janelaX_min, janelaY_min);
-        Point2D jan_max = new Point2D.Double(janelaX_max, janelaY_max);
+        Point2D jan_min = new Point2D.Double(janela.getXmin(), janela.getYmin());
+        Point2D jan_max = new Point2D.Double(janela.getXmax(), janela.getYmax());
         Point2D view_min = new Point2D.Double(0, 0);
         Point2D view_max = new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
         Point2D novoP = Transformacao2D.viewportJanela(jan_min, jan_max, view_min, view_max, p);
@@ -139,8 +136,7 @@ public class ControleDesenho implements ActionListener {
             }
         }
         if (pontoProximidade != null){
-            mouseX = (int) pontoProximidade.getX();
-            mouseY = (int) pontoProximidade.getY();
+            moverMouse((int) pontoProximidade.getX(), (int) pontoProximidade.getY());
         }
         
         if (desenhando){
@@ -152,6 +148,11 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void desenhar(Graphics2D g){
+        Point2D jan_min = new Point2D.Double(janela.getXmin(), janela.getYmin());
+        Point2D jan_max = new Point2D.Double(janela.getXmax(), janela.getYmax());
+        Point2D view_min = new Point2D.Double(0, 0);
+        Point2D view_max = new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
+        
         g.setColor(Color.WHITE);
         
         if (desenhando){
@@ -233,17 +234,31 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void zoomExtend(){
-        
+        double menorX = Double.MAX_VALUE;
+        double menorY = Double.MAX_VALUE;
+        double maiorX = Double.MIN_VALUE;
+        double maiorY = Double.MIN_VALUE;
+        for (Forma forma : formas) {
+            for (Point2D ponto : forma.getPontos()) {
+                if (ponto.getX() < menorX){
+                    menorX = ponto.getX();
+                }
+                if (ponto.getY() < menorY){
+                    menorY = ponto.getY();
+                }
+                if (ponto.getX() > maiorX){
+                    maiorX = ponto.getX();
+                }
+                if (ponto.getY() > maiorY){
+                    maiorY = ponto.getY();
+                }
+            }
+        }
     }
     
     private void zoomJanela(double zoom, Point2D referencia){
         Point2D ref2 = viewportJanela(referencia);
-        Point2D p1 = Transformacao2D.escala(new Point2D.Double(janelaX_min, janelaY_min), ref2, 1/zoom, 1/zoom);
-        Point2D p2 = Transformacao2D.escala(new Point2D.Double(janelaX_max, janelaY_max), ref2, 1/zoom, 1/zoom);
-        janelaX_min = p1.getX();
-        janelaY_min = p1.getY();
-        janelaX_max = p2.getX();
-        janelaY_max = p2.getY();
+        janela.zoom(zoom, ref2);
     }
     
     public void pan(){
@@ -301,10 +316,8 @@ public class ControleDesenho implements ActionListener {
             return;
         }
         
-        JTextField dxField = new JTextField();
-        JTextField dyField = new JTextField();
-        dxField.setText("0");
-        dyField.setText("0");
+        JSpinner dxField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
+        JSpinner dyField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
         Object[] message = {
             "Deslocamento em X:", dxField,
             "Deslocamento em Y:", dyField
@@ -312,8 +325,8 @@ public class ControleDesenho implements ActionListener {
 
         int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            double dx = Double.valueOf(dxField.getText());
-            double dy = Double.valueOf(dyField.getText());
+            double dx = (double) dxField.getValue();
+            double dy = (double) dyField.getValue();
             
             for (Forma forma : getSelecionados()) {
                 forma.translacao(dx, dy);
@@ -328,14 +341,10 @@ public class ControleDesenho implements ActionListener {
             return;
         }
         
-        JTextField xRefField = new JTextField();
-        JTextField yRefField = new JTextField();
-        JTextField sxField = new JTextField();
-        JTextField syField = new JTextField();
-        xRefField.setText("0");
-        yRefField.setText("0");
-        sxField.setText("0");
-        syField.setText("0");
+        JSpinner xRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
+        JSpinner yRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
+        JSpinner sxField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
+        JSpinner syField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
         Object[] message = {
             "X Referência:", xRefField,
             "Y Referência:", yRefField,
@@ -345,10 +354,10 @@ public class ControleDesenho implements ActionListener {
 
         int option = JOptionPane.showConfirmDialog(null, message, "Escala", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            double xRef = Double.valueOf(xRefField.getText());
-            double yRef = Double.valueOf(yRefField.getText());
-            double sx = Double.valueOf(sxField.getText());
-            double sy = Double.valueOf(syField.getText());
+            double xRef = (double) xRefField.getValue();
+            double yRef = (double) yRefField.getValue();
+            double sx = (double) sxField.getValue();
+            double sy = (double) syField.getValue();
             
             Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             
@@ -365,12 +374,9 @@ public class ControleDesenho implements ActionListener {
             return;
         }
         
-        JTextField xRefField = new JTextField();
-        JTextField yRefField = new JTextField();
-        JTextField thetaField = new JTextField();
-        xRefField.setText("0");
-        yRefField.setText("0");
-        thetaField.setText("0");
+        JSpinner xRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
+        JSpinner yRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
+        JSpinner thetaField = new JSpinner(new SpinnerNumberModel(90, -2000, 2000, 0.001));
         Object[] message = {
             "X Referência:", xRefField,
             "Y Referência:", yRefField,
@@ -379,12 +385,12 @@ public class ControleDesenho implements ActionListener {
 
         int option = JOptionPane.showConfirmDialog(null, message, "Rotação", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            double xRef = Double.valueOf(xRefField.getText());
-            double yRef = Double.valueOf(yRefField.getText());
-            double alpha = Double.valueOf(thetaField.getText());
+            double xRef = (double) xRefField.getValue();
+            double yRef = (double) yRefField.getValue();
+            double theta = (double) thetaField.getValue();
             Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             for (Forma forma : getSelecionados()) {
-                forma.rotacao(alpha, referencia);
+                forma.rotacao(theta, referencia);
             }
             rectSelecao = null;
         }
@@ -488,8 +494,7 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void mouseArrastar(int posX, int posY){
-        mouseX = posX;
-        mouseY = posY;
+        moverMouse(posX, posY);
         if (panning){
             pan();
             mouseX_anterior = mouseX;
@@ -502,6 +507,8 @@ public class ControleDesenho implements ActionListener {
     public void moverMouse(int x, int y){
         mouseX = x;
         mouseY = y;
+        Point2D p = viewportJanela(new Point2D.Double(mouseX, mouseY));
+        janela.atualizarMouse(p.getX(), p.getY());
     }
     
     public int getMouseX() {
@@ -513,13 +520,11 @@ public class ControleDesenho implements ActionListener {
     }
     
     public double getMouseX_janela(){
-        Point2D p = viewportJanela(new Point2D.Double(mouseX, mouseY));
-        return p.getX();
+        return janela.getMouseX();
     }
     
     public double getMouseY_janela(){
-        Point2D p = viewportJanela(new Point2D.Double(mouseX, mouseY));
-        return p.getY();
+        return janela.getMouseY();
     }
     
     public Rectangle2D getRectProximidade(double x, double y){

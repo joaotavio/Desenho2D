@@ -23,6 +23,15 @@ public class Circulo extends Forma {
     }
     
     @Override
+    public Forma criarCopia(){
+        Forma nova = new Circulo(circulo.getMinX(), circulo.getMinY(), circulo.getMaxX(), circulo.getMaxY());
+        ((Circulo)nova).angulo = this.angulo;
+        if (pontoRef != null)
+            ((Circulo)nova).pontoRef = new Point2D.Double(this.pontoRef.getX(), this.pontoRef.getY());
+        return nova;
+    }
+    
+    @Override
     public void translacao(double dx, double dy){
         super.translacao(dx, dy);
         if (pontoRef != null)

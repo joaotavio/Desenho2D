@@ -15,6 +15,12 @@ public class Linha extends Forma {
         linha = new Line2D.Double(x1, y1, x2, y2);
         forma = linha;
     }
+    
+    @Override
+    public Forma criarCopia(){
+        Forma nova = new Linha(linha.getX1(), linha.getY1(), linha.getX2(), linha.getY2());
+        return nova;
+    }
 
     @Override
     public void desenhar(Graphics2D g) {

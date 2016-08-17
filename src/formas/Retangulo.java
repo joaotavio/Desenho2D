@@ -24,6 +24,22 @@ public class Retangulo extends Forma {
         setPoligono();
     }
     
+    public Retangulo(ArrayList<Point2D> pontos){
+        super();
+        pontoFixo.setLocation(pontos.get(0).getX(), pontos.get(0).getY());
+        this.pontos = new ArrayList<>(4);
+        for (Point2D p : pontos) {
+            this.pontos.add(new Point2D.Double(p.getX(), p.getY()));
+        }
+        setPoligono();
+    }
+    
+    @Override
+    public Forma criarCopia(){
+        Forma nova = new Retangulo(pontos);
+        return nova;
+    }
+    
     private void setPoligono() {
         int[] x = {(int)pontos.get(0).getX(), (int)pontos.get(1).getX(), (int)pontos.get(2).getX(), (int)pontos.get(3).getX()};
         int[] y = {(int)pontos.get(0).getY(), (int)pontos.get(1).getY(), (int)pontos.get(2).getY(), (int)pontos.get(3).getY()};
