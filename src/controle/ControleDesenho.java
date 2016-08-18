@@ -60,9 +60,11 @@ public class ControleDesenho implements ActionListener {
     public static final int DELAY = 17;
     
     private final Janela janela;
+    private ArrayList<Forma> formasWCS; // formas em coordenadas do mundo
 
     public ControleDesenho() {
         formas = new ArrayList<>();
+        formasWCS = new ArrayList<>();
         mouseInput = new MouseInput(this);
         tecladoInput = new TecladoInput(this);
         painelDesenho = new PainelDesenho(this);
@@ -96,15 +98,6 @@ public class ControleDesenho implements ActionListener {
             double janelaY_max = (double)yMaxField.getValue();
             janela.setJanela(janelaX_min, janelaY_min, janelaX_max, janelaY_max);
         }
-    }
-    
-    private Point2D janelaViewport(Point2D p){
-        Point2D jan_min = new Point2D.Double(janela.getXmin(), janela.getYmin());
-        Point2D jan_max = new Point2D.Double(janela.getXmax(), janela.getYmax());
-        Point2D view_min = new Point2D.Double(0, 0);
-        Point2D view_max = new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
-        Point2D novoP = Transformacao2D.janelaViewport(jan_min, jan_max, view_min, view_max, p);
-        return novoP;
     }
     
     private Point2D viewportJanela(Point2D p){
@@ -148,11 +141,6 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void desenhar(Graphics2D g){
-        Point2D jan_min = new Point2D.Double(janela.getXmin(), janela.getYmin());
-        Point2D jan_max = new Point2D.Double(janela.getXmax(), janela.getYmax());
-        Point2D view_min = new Point2D.Double(0, 0);
-        Point2D view_max = new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
-        
         g.setColor(Color.WHITE);
         
         if (desenhando){
@@ -215,6 +203,9 @@ public class ControleDesenho implements ActionListener {
         }
         
         zoomJanela(zoom, referencia);
+        /*for (int i = 0; i < formas.size(); i++) {
+            formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+        }*/
     }
     
     public void zoomIn(int posX, int posY){
@@ -234,26 +225,108 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void zoomExtend(){
-        double menorX = Double.MAX_VALUE;
-        double menorY = Double.MAX_VALUE;
-        double maiorX = Double.MIN_VALUE;
-        double maiorY = Double.MIN_VALUE;
-        for (Forma forma : formas) {
-            for (Point2D ponto : forma.getPontos()) {
-                if (ponto.getX() < menorX){
-                    menorX = ponto.getX();
+        if (formas.isEmpty())
+            return;
+        
+        //Coordeanadas Dispositivo
+        Double Umax = (double) painelDesenho.getWidth();
+        Double Umin = 0.0;
+        Double Vmax = (double) painelDesenho.getHeight();
+        Double Vmin = 0.0;
+        
+        //Coordenadas Janela
+        Double Xmax = Double.MIN_VALUE;
+        Double Ymax = Double.MIN_VALUE;
+        Double Xmin = Double.MAX_VALUE;
+        Double Ymin = Double.MAX_VALUE;
+        
+        for(Forma forma : formasWCS){
+            for(Point2D ponto : forma.getPontos()){
+                if(ponto.getX() > Xmax){
+                    Xmax = ponto.getX();
                 }
-                if (ponto.getY() < menorY){
-                    menorY = ponto.getY();
+                if(ponto.getX() < Xmin){
+                    Xmin = ponto.getX();
                 }
-                if (ponto.getX() > maiorX){
-                    maiorX = ponto.getX();
+                if(ponto.getY() > Ymax){
+                    Ymax = ponto.getY();
                 }
-                if (ponto.getY() > maiorY){
-                    maiorY = ponto.getY();
+                if(ponto.getY() < Ymin){
+                    Ymin = ponto.getY();
                 }
             }
         }
+        
+        Xmin = Xmin - 0.15*Math.abs(Xmax-Xmin);
+        Xmax = Xmax + 0.15*Math.abs(Xmax-Xmin);
+        Ymin = Ymin - 0.15*Math.abs(Ymax-Ymin);
+        Ymax = Ymax + 0.15*Math.abs(Ymax-Ymin);
+        
+        janela.setJanela(Xmin, Ymin, Xmax, Ymax);
+
+        //calculando o aspect ratio
+        Double rv = (Umax - Umin) / (Vmax - Vmin);
+        Double rw = (Xmax - Xmin) / (Ymax - Ymin);
+
+        if (rw > rv){
+            Vmax = (Umax - Umin)/rw + Vmin; 
+        } else if (rv > rw) {
+            Umax = rw * (Vmax - Vmin) + Umin;
+        }
+        
+        for (int i = 0; i < formas.size(); i++) {
+            System.out.println(formas.get(i).getPontos());
+            formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), new Point2D.Double(Umax, Vmax)));
+            System.out.println(formas.get(i).getPontos());
+            //System.out.println(formasWCS.get(i).getPontos());
+            //formasWCS.set(i, formas.get(i).viewportJanela(getJanMin(), getJanMax(), getViewMin(), new Point2D.Double(Umax, Vmax)));
+            //System.out.println(formasWCS.get(i).getPontos());
+            System.out.println("-----------------------");
+        }
+        
+        //Enquadramento da janela
+        /*Double sx = (Umax - Umin) / (Xmax - Xmin);
+        Double sy = (Vmax - Vmin) / (Ymax - Ymin);
+        Point2D.Double origem = new Point2D.Double(0.0, 0.0);
+        
+        for(Forma forma: formas){
+            forma.escala(sx, sy, origem);
+        }
+        
+        //centralizando objetos
+        Xmax = Double.MIN_VALUE;
+        Ymax = Double.MIN_VALUE;
+        Xmin = Double.MAX_VALUE;
+        Ymin = Double.MAX_VALUE;
+        for(Forma forma : formas){
+            for(Point2D ponto : forma.getPontos()){
+                if(ponto.getX() > Xmax){
+                    Xmax = ponto.getX();
+                }
+                if(ponto.getX() < Xmin){
+                    Xmin = ponto.getX();
+                }
+                if(ponto.getY() > Ymax){
+                    Ymax = ponto.getY();
+                }
+                if(ponto.getY() < Ymin){
+                    Ymin = ponto.getY();
+                }
+            }
+        }
+        
+        
+        
+        Double Umet = (double) painelDesenho.getWidth() / 2;
+        Double Vmet = (double) painelDesenho.getHeight() / 2;
+        Double Xmet = (Xmax + Xmin)/2;
+        Double Ymet = (Ymax + Ymin)/2;
+        Double Xtrans = Umet - Xmet;
+        Double Ytrans = Vmet - Ymet;
+        
+        for(Forma forma : formas){
+            forma.translacao(Xtrans, Ytrans);
+        }*/
     }
     
     private void zoomJanela(double zoom, Point2D referencia){
@@ -287,6 +360,7 @@ public class ControleDesenho implements ActionListener {
         for (int i = formas.size()-1; i >= 0; i--) {
             if (formas.get(i).estaSelecionada()){
                 formas.remove(i);
+                formasWCS.remove(i);
             }
         }
         rectSelecao = null;
@@ -294,6 +368,7 @@ public class ControleDesenho implements ActionListener {
     
     public void limpar(){
         formas = new ArrayList<>();
+        formasWCS = new ArrayList<>();
         rectSelecao = null;
     }
     
@@ -328,8 +403,14 @@ public class ControleDesenho implements ActionListener {
             double dx = (double) dxField.getValue();
             double dy = (double) dyField.getValue();
             
-            for (Forma forma : getSelecionados()) {
+            /*for (Forma forma : getSelecionados()) {
                 forma.translacao(dx, dy);
+            }*/
+            for (int i = 0; i < formas.size(); i++) {
+                if (formas.get(i).estaSelecionada()) {
+                    formasWCS.get(i).translacao(dx, dy);
+                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+                }
             }
             rectSelecao = null;
         }
@@ -361,8 +442,14 @@ public class ControleDesenho implements ActionListener {
             
             Point2D.Double referencia = new Point2D.Double(xRef, yRef);
             
-            for (Forma forma : getSelecionados()) {
+            /*for (Forma forma : getSelecionados()) {
                 forma.escala(sx, sy, referencia);
+            }*/
+            for (int i = 0; i < formas.size(); i++) {
+                if (formas.get(i).estaSelecionada()) {
+                    formasWCS.get(i).escala(sx, sy, referencia);
+                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+                }
             }
             rectSelecao = null;
         }
@@ -388,9 +475,17 @@ public class ControleDesenho implements ActionListener {
             double xRef = (double) xRefField.getValue();
             double yRef = (double) yRefField.getValue();
             double theta = (double) thetaField.getValue();
+            
             Point2D.Double referencia = new Point2D.Double(xRef, yRef);
-            for (Forma forma : getSelecionados()) {
+            
+            /*for (Forma forma : getSelecionados()) {
                 forma.rotacao(theta, referencia);
+            }*/
+            for (int i = 0; i < formas.size(); i++) {
+                if (formas.get(i).estaSelecionada()) {
+                    formasWCS.get(i).rotacao(theta, referencia);
+                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+                }
             }
             rectSelecao = null;
         }
@@ -398,11 +493,16 @@ public class ControleDesenho implements ActionListener {
     
     public ArrayList<Forma> getSelecionados(){
         ArrayList<Forma> selecionados = new ArrayList<>();
-        for (Forma forma : formas) {
+        for (int i = 0; i < formas.size(); i++) {
+            if (formas.get(i).estaSelecionada()){
+                selecionados.add(formasWCS.get(i));
+            }
+        }
+        /*for (Forma forma : formas) {
             if (forma.estaSelecionada()){
                 selecionados.add(forma);
             }
-        }
+        }*/
         return selecionados;
     }
     
@@ -426,6 +526,7 @@ public class ControleDesenho implements ActionListener {
             }
         } else {
             formas.add(formaDesenhando);
+            formasWCS.add(formaDesenhando.viewportJanela(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
         }
         desenhando = !desenhando;
     }
@@ -553,6 +654,22 @@ public class ControleDesenho implements ActionListener {
     
     public double getZoomAcc(){
         return zoomAcc;
+    }
+    
+    public Point2D getJanMin(){
+        return new Point2D.Double(janela.getXmin(), janela.getYmin());
+    }
+    
+    public Point2D getJanMax(){
+        return new Point2D.Double(janela.getXmax(), janela.getYmax());
+    }
+    
+    public Point2D getViewMin(){
+        return new Point2D.Double(0, 0);
+    }
+    
+    public Point2D getViewMax(){
+        return new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
     }
 
 }

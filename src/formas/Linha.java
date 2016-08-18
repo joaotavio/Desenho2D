@@ -19,6 +19,10 @@ public class Linha extends Forma {
     @Override
     public Forma criarCopia(){
         Forma nova = new Linha(linha.getX1(), linha.getY1(), linha.getX2(), linha.getY2());
+        nova.cor = this.cor;
+        nova.fill = this.fill;
+        nova.selecionada = this.selecionada;
+        nova.mouseOver = this.mouseOver;
         return nova;
     }
 
@@ -36,7 +40,7 @@ public class Linha extends Forma {
     }
     
     @Override
-    public void setDistancia(int x, int y, boolean modoOrtho) {
+    public void setDistancia(double x, double y, boolean modoOrtho) {
         if (modoOrtho){
             double difX = Math.abs(linha.getX1() - x);
             double difY = Math.abs(linha.getY1() - y);

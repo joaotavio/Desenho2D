@@ -37,6 +37,10 @@ public class Retangulo extends Forma {
     @Override
     public Forma criarCopia(){
         Forma nova = new Retangulo(pontos);
+        nova.cor = this.cor;
+        nova.fill = this.fill;
+        nova.selecionada = this.selecionada;
+        nova.mouseOver = this.mouseOver;
         return nova;
     }
     
@@ -72,7 +76,7 @@ public class Retangulo extends Forma {
     }
 
     @Override
-    public void setDistancia(int posX, int posY, boolean modoOrtho) {
+    public void setDistancia(double posX, double posY, boolean modoOrtho) {
         double x = posX;
         double y = posY;
         

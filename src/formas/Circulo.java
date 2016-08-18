@@ -28,6 +28,10 @@ public class Circulo extends Forma {
         ((Circulo)nova).angulo = this.angulo;
         if (pontoRef != null)
             ((Circulo)nova).pontoRef = new Point2D.Double(this.pontoRef.getX(), this.pontoRef.getY());
+        nova.cor = this.cor;
+        nova.fill = this.fill;
+        nova.selecionada = this.selecionada;
+        nova.mouseOver = this.mouseOver;
         return nova;
     }
     
@@ -72,7 +76,7 @@ public class Circulo extends Forma {
     }
 
     @Override
-    public void setDistancia(int posX, int posY, boolean modoOrtho) {
+    public void setDistancia(double posX, double posY, boolean modoOrtho) {
         double x = posX;
         double y = posY;
         
