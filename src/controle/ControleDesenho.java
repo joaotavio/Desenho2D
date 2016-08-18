@@ -227,106 +227,106 @@ public class ControleDesenho implements ActionListener {
     public void zoomExtend(){
         if (formas.isEmpty())
             return;
-        
+
         //Coordeanadas Dispositivo
         Double Umax = (double) painelDesenho.getWidth();
         Double Umin = 0.0;
         Double Vmax = (double) painelDesenho.getHeight();
         Double Vmin = 0.0;
-        
+
         //Coordenadas Janela
         Double Xmax = Double.MIN_VALUE;
         Double Ymax = Double.MIN_VALUE;
         Double Xmin = Double.MAX_VALUE;
         Double Ymin = Double.MAX_VALUE;
-        
-        for(Forma forma : formasWCS){
-            for(Point2D ponto : forma.getPontos()){
-                if(ponto.getX() > Xmax){
+
+        for (Forma forma : formas) {
+            for (Point2D ponto : forma.getPontos()) {
+                if (ponto.getX() > Xmax) {
                     Xmax = ponto.getX();
                 }
-                if(ponto.getX() < Xmin){
+                if (ponto.getX() < Xmin) {
                     Xmin = ponto.getX();
                 }
-                if(ponto.getY() > Ymax){
+                if (ponto.getY() > Ymax) {
                     Ymax = ponto.getY();
                 }
-                if(ponto.getY() < Ymin){
+                if (ponto.getY() < Ymin) {
                     Ymin = ponto.getY();
                 }
             }
         }
-        
-        Xmin = Xmin - 0.15*Math.abs(Xmax-Xmin);
+
+        Xmin = Xmin - 0.15 * Math.abs(Xmax - Xmin);
         Xmax = Xmax + 0.15*Math.abs(Xmax-Xmin);
         Ymin = Ymin - 0.15*Math.abs(Ymax-Ymin);
         Ymax = Ymax + 0.15*Math.abs(Ymax-Ymin);
         
-        janela.setJanela(Xmin, Ymin, Xmax, Ymax);
+        Point2D pmin = viewportJanela(new Point2D.Double(Xmin, Ymax));
+        Point2D pmax = viewportJanela(new Point2D.Double(Xmax, Ymin));
+        janela.setJanela(pmin.getX(), pmin.getY(), pmax.getX(), pmax.getY());
+
+        //translação a origem
+        for (Forma forma : formas) {
+            forma.translacao(-Xmin, -Ymin);
+        }
 
         //calculando o aspect ratio
         Double rv = (Umax - Umin) / (Vmax - Vmin);
         Double rw = (Xmax - Xmin) / (Ymax - Ymin);
 
-        if (rw > rv){
-            Vmax = (Umax - Umin)/rw + Vmin; 
-        } else if (rv > rw) {
+        if (rw > rv) {
+            Vmax = (Umax - Umin) / rw + Vmin;
+        }
+        if (rw < rv) {
             Umax = rw * (Vmax - Vmin) + Umin;
         }
-        
-        for (int i = 0; i < formas.size(); i++) {
-            System.out.println(formas.get(i).getPontos());
-            formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), new Point2D.Double(Umax, Vmax)));
-            System.out.println(formas.get(i).getPontos());
-            //System.out.println(formasWCS.get(i).getPontos());
-            //formasWCS.set(i, formas.get(i).viewportJanela(getJanMin(), getJanMax(), getViewMin(), new Point2D.Double(Umax, Vmax)));
-            //System.out.println(formasWCS.get(i).getPontos());
-            System.out.println("-----------------------");
-        }
-        
+
         //Enquadramento da janela
-        /*Double sx = (Umax - Umin) / (Xmax - Xmin);
+        Double sx = (Umax - Umin) / (Xmax - Xmin);
         Double sy = (Vmax - Vmin) / (Ymax - Ymin);
         Point2D.Double origem = new Point2D.Double(0.0, 0.0);
-        
-        for(Forma forma: formas){
+
+        for (Forma forma : formas) {
             forma.escala(sx, sy, origem);
         }
-        
+
         //centralizando objetos
         Xmax = Double.MIN_VALUE;
         Ymax = Double.MIN_VALUE;
         Xmin = Double.MAX_VALUE;
         Ymin = Double.MAX_VALUE;
-        for(Forma forma : formas){
-            for(Point2D ponto : forma.getPontos()){
-                if(ponto.getX() > Xmax){
+        for (Forma forma : formas) {
+            for (Point2D ponto : forma.getPontos()) {
+                if (ponto.getX() > Xmax) {
                     Xmax = ponto.getX();
                 }
-                if(ponto.getX() < Xmin){
+                if (ponto.getX() < Xmin) {
                     Xmin = ponto.getX();
                 }
-                if(ponto.getY() > Ymax){
+                if (ponto.getY() > Ymax) {
                     Ymax = ponto.getY();
                 }
-                if(ponto.getY() < Ymin){
+                if (ponto.getY() < Ymin) {
                     Ymin = ponto.getY();
                 }
             }
         }
-        
-        
-        
+
         Double Umet = (double) painelDesenho.getWidth() / 2;
         Double Vmet = (double) painelDesenho.getHeight() / 2;
-        Double Xmet = (Xmax + Xmin)/2;
-        Double Ymet = (Ymax + Ymin)/2;
+        Double Xmet = (Xmax + Xmin) / 2;
+        Double Ymet = (Ymax + Ymin) / 2;
         Double Xtrans = Umet - Xmet;
         Double Ytrans = Vmet - Ymet;
-        
-        for(Forma forma : formas){
+
+        for (Forma forma : formas) {
             forma.translacao(Xtrans, Ytrans);
-        }*/
+        }
+        
+        for (int i = 0; i < formas.size(); i++) {
+            formasWCS.set(i, formas.get(i).viewportJanela(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+        }
     }
     
     private void zoomJanela(double zoom, Point2D referencia){
