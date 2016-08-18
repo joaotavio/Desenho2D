@@ -1,6 +1,9 @@
 package controle;
 
 import controle.ferramentas.Ferramenta;
+import controle.ferramentas.FerramentaEscala;
+import controle.ferramentas.FerramentaMover;
+import controle.ferramentas.FerramentaRotacao;
 import formas.Circulo;
 import formas.Forma;
 import formas.Linha;
@@ -285,7 +288,7 @@ public class ControleDesenho implements ActionListener {
         Double sx = (Umax - Umin) / (Xmax - Xmin);
         Double sy = (Vmax - Vmin) / (Ymax - Ymin);
         Point2D.Double origem = new Point2D.Double(0.0, 0.0);
-
+        
         for (Forma forma : formas) {
             forma.escala(sx, sy, origem);
         }
@@ -347,6 +350,16 @@ public class ControleDesenho implements ActionListener {
             rectSelecao.translacao(dx, dy);
         }
         painelDesenho.pan(dx, dy);
+        panJanela(dx, dy);
+        /*for (int i = 0; i < formas.size(); i++) {
+            formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
+        }*/
+    }
+    
+    private void panJanela(int dx, int dy){
+        double x = dx * (getJanMax().getX() - getJanMin().getX()) / (getViewMax().getX() - getViewMin().getX());
+        double y = dy * (getJanMax().getY() - getJanMin().getY()) / (getViewMax().getY() - getViewMin().getY());
+        janela.pan(x, y);
     }
     
     public void cancelarForma(){
@@ -385,109 +398,33 @@ public class ControleDesenho implements ActionListener {
     }
     
     public void ferramentaMover(){
-        if (rectSelecao == null){
+        if (getSelecionados().isEmpty()){
             tela.mostrarMensagem("Não há objetos selecionados.");
-            return;
+        } else {
+            tela.mostrarMensagem("Selecione um ponto de referência.");
         }
         
-        JSpinner dxField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        JSpinner dyField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        Object[] message = {
-            "Deslocamento em X:", dxField,
-            "Deslocamento em Y:", dyField
-        };
-
-        int option = JOptionPane.showConfirmDialog(null, message, "Mover", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            double dx = (double) dxField.getValue();
-            double dy = (double) dyField.getValue();
-            
-            /*for (Forma forma : getSelecionados()) {
-                forma.translacao(dx, dy);
-            }*/
-            for (int i = 0; i < formas.size(); i++) {
-                if (formas.get(i).estaSelecionada()) {
-                    formasWCS.get(i).translacao(dx, dy);
-                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
-                }
-            }
-            rectSelecao = null;
-        }
+        ferramenta = new FerramentaMover(this);
     }
     
     public void ferramentaEscala(){
-        if (rectSelecao == null){
+        if (getSelecionados().isEmpty()){
             tela.mostrarMensagem("Não há objetos selecionados.");
-            return;
+        } else {
+            tela.mostrarMensagem("Selecione um ponto de referência.");
         }
         
-        JSpinner xRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        JSpinner yRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        JSpinner sxField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
-        JSpinner syField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
-        Object[] message = {
-            "X Referência:", xRefField,
-            "Y Referência:", yRefField,
-            "Mudança de Escala em X:", sxField,
-            "Mudança de Escala em Y:", syField
-        };
-
-        int option = JOptionPane.showConfirmDialog(null, message, "Escala", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            double xRef = (double) xRefField.getValue();
-            double yRef = (double) yRefField.getValue();
-            double sx = (double) sxField.getValue();
-            double sy = (double) syField.getValue();
-            
-            Point2D.Double referencia = new Point2D.Double(xRef, yRef);
-            
-            /*for (Forma forma : getSelecionados()) {
-                forma.escala(sx, sy, referencia);
-            }*/
-            for (int i = 0; i < formas.size(); i++) {
-                if (formas.get(i).estaSelecionada()) {
-                    formasWCS.get(i).escala(sx, sy, referencia);
-                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
-                }
-            }
-            rectSelecao = null;
-        }
+        ferramenta = new FerramentaEscala(this);
     }
     
     public void ferramentaRotacao(){
-        if (rectSelecao == null){
+        if (getSelecionados().isEmpty()){
             tela.mostrarMensagem("Não há objetos selecionados.");
-            return;
+        } else {
+            tela.mostrarMensagem("Selecione um ponto de referência.");
         }
         
-        JSpinner xRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        JSpinner yRefField = new JSpinner(new SpinnerNumberModel(0, -2000, 2000, 0.001));
-        JSpinner thetaField = new JSpinner(new SpinnerNumberModel(90, -2000, 2000, 0.001));
-        Object[] message = {
-            "X Referência:", xRefField,
-            "Y Referência:", yRefField,
-            "Ângulo de Rotação (em graus):", thetaField
-        };
-
-        int option = JOptionPane.showConfirmDialog(null, message, "Rotação", JOptionPane.OK_CANCEL_OPTION);
-        if (option == JOptionPane.OK_OPTION) {
-            double xRef = (double) xRefField.getValue();
-            double yRef = (double) yRefField.getValue();
-            double theta = (double) thetaField.getValue();
-            
-            Point2D.Double referencia = new Point2D.Double(xRef, yRef);
-            
-            /*for (Forma forma : getSelecionados()) {
-                forma.rotacao(theta, referencia);
-            }*/
-            for (int i = 0; i < formas.size(); i++) {
-                if (formas.get(i).estaSelecionada()) {
-                    formasWCS.get(i).rotacao(theta, referencia);
-                    formas.set(i, formasWCS.get(i).janelaViewport(getJanMin(), getJanMax(), getViewMin(), getViewMax()));
-                }
-            }
-            rectSelecao = null;
-        }
+        ferramenta = new FerramentaRotacao(this);
     }
     
     public ArrayList<Forma> getSelecionados(){
@@ -497,11 +434,6 @@ public class ControleDesenho implements ActionListener {
                 selecionados.add(formasWCS.get(i));
             }
         }
-        /*for (Forma forma : formas) {
-            if (forma.estaSelecionada()){
-                selecionados.add(forma);
-            }
-        }*/
         return selecionados;
     }
     
@@ -531,24 +463,12 @@ public class ControleDesenho implements ActionListener {
     }
     
     private void ferramentaTransformacao(){
-        /*if (rectSelecao == null){
+        if (getSelecionados().isEmpty()){
             mostrarMensagem("Não há objetos selecionados.");
             return;
         }
         
-        if (ferramenta == null){
-            switch (tela.getFerramentaSelecionada()) {
-                case "MOVER":
-                    break;
-                case "ESCALA":
-                    ferramenta = new FerramentaEscala(this);
-                    break;
-                case "ROTACAO":
-                    break;
-            }
-        }
-        
-        ferramenta.click(mouseX, mouseY);*/
+        ferramenta.click(mouseX, mouseY);
     }
     
     private void acaoFerramenta(){
@@ -558,7 +478,6 @@ public class ControleDesenho implements ActionListener {
             case "ELIPSE":
                 criarForma();
                 break;
-            case "MOVER":
             case "ESCALA":
             case "ROTACAO":
                 ferramentaTransformacao();
@@ -669,6 +588,26 @@ public class ControleDesenho implements ActionListener {
     
     public Point2D getViewMax(){
         return new Point2D.Double(painelDesenho.getWidth(), painelDesenho.getHeight());
+    }
+
+    public TelaPrincipal getTela() {
+        return tela;
+    }
+
+    public Retangulo getRectSelecao() {
+        return rectSelecao;
+    }
+
+    public void setRectSelecao(Retangulo rectSelecao) {
+        this.rectSelecao = rectSelecao;
+    }
+
+    public ArrayList<Forma> getFormas() {
+        return formas;
+    }
+
+    public ArrayList<Forma> getFormasWCS() {
+        return formasWCS;
     }
 
 }

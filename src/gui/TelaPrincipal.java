@@ -48,9 +48,9 @@ public class TelaPrincipal {
     private JToggleButton btnRetangulo;
     private JToggleButton btnElipse;
     
-    private JButton btnMover;
-    private JButton btnEscala;
-    private JButton btnRotacao;
+    private JToggleButton btnMover;
+    private JToggleButton btnEscala;
+    private JToggleButton btnRotacao;
     
     private JMenuBar menuBar;
     private JMenu arquivo;
@@ -133,6 +133,13 @@ public class TelaPrincipal {
         ImageIcon lineIcon = new ImageIcon(getScaledImage(new ImageIcon("images/lineIcon.png").getImage(), 20, 20));
         ImageIcon rectIcon = new ImageIcon(getScaledImage(new ImageIcon("images/rectIcon.png").getImage(), 25, 20));
         ImageIcon elipseIcon = new ImageIcon(getScaledImage(new ImageIcon("images/ellipseIcon.png").getImage(), 20, 20));
+        ImageIcon moverIcon = new ImageIcon(getScaledImage(new ImageIcon("images/moverIcon.png").getImage(), 20, 20));
+        ImageIcon escalaIcon = new ImageIcon(getScaledImage(new ImageIcon("images/escalaIcon.png").getImage(), 20, 20));
+        ImageIcon rotacaoIcon = new ImageIcon(getScaledImage(new ImageIcon("images/rotacaoIcon.png").getImage(), 20, 20));
+        ImageIcon zoomexIcon = new ImageIcon(getScaledImage(new ImageIcon("images/zoomexIcon.png").getImage(), 20, 20));
+        ImageIcon zoominIcon = new ImageIcon(getScaledImage(new ImageIcon("images/zoominIcon.png").getImage(), 20, 20));
+        ImageIcon zoomoutIcon = new ImageIcon(getScaledImage(new ImageIcon("images/zoomoutIcon.png").getImage(), 20, 20));
+        ImageIcon limparIcon = new ImageIcon("images/limparIcon.png");
         
         btnLinha = new JToggleButton("Linha", lineIcon);
         btnLinha.setActionCommand("LINHA");
@@ -149,18 +156,18 @@ public class TelaPrincipal {
         
         grupoBtn.setSelected(btnLinha.getModel(), true);
         
-        btnMover = new JButton("Mover");
+        btnMover = new JToggleButton("Mover", moverIcon);
         btnMover.setActionCommand("MOVER");
         
-        btnEscala = new JButton("Escala");
+        btnEscala = new JToggleButton("Escala", escalaIcon);
         btnEscala.setActionCommand("ESCALA");
         
-        btnRotacao = new JButton("Rotação");
+        btnRotacao = new JToggleButton("Rotação", rotacaoIcon);
         btnRotacao.setActionCommand("ROTACAO");
         
-        //grupoBtn.add(btnMover);
-        //grupoBtn.add(btnEscala);
-        //grupoBtn.add(btnRotacao);
+        grupoBtn.add(btnMover);
+        grupoBtn.add(btnEscala);
+        grupoBtn.add(btnRotacao);
         
         toolBar.add(btnLinha);
         toolBar.add(btnRetangulo);
@@ -171,11 +178,11 @@ public class TelaPrincipal {
         toolBar.add(btnEscala);
         toolBar.add(btnRotacao);
         
-        JButton btnZoomIn = new JButton("Zoom In");
-        JButton btnZoomOut = new JButton("Zoom Out");
-        JButton btnZoomExtend = new JButton("Zoom Extend");
+        JButton btnZoomIn = new JButton("Zoom In", zoominIcon);
+        JButton btnZoomOut = new JButton("Zoom Out", zoomoutIcon);
+        JButton btnZoomExtend = new JButton("Zoom Extend", zoomexIcon);
         
-        JButton btnLimpar = new JButton("Limpar");
+        JButton btnLimpar = new JButton("Limpar", limparIcon);
         
         toolBar.addSeparator();
         toolBar.add(btnZoomIn);
@@ -205,15 +212,6 @@ public class TelaPrincipal {
         statusBar.add(labelStatus, BorderLayout.LINE_END);
         statusBar.add(labelMsg, BorderLayout.LINE_START);
         painelPrincipal.add(statusBar, BorderLayout.PAGE_END);
-        
-        /*JTextField f = new JTextField(50);
-        statusBar.add(f, BorderLayout.LINE_START);
-        
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                f.requestFocus();
-            }
-        });*/
     }
     
     private void atualizarStatusLabel(double u, double v, double x, double y){
@@ -305,7 +303,8 @@ public class TelaPrincipal {
     private class AcaoMenuNovo implements ActionListener{
         @Override
         public void actionPerformed(ActionEvent e) {
-            controleDesenho.limpar();
+            frame.dispose();
+            ControleDesenho controle = new ControleDesenho();
         }
         
     }

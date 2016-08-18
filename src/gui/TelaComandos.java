@@ -55,11 +55,11 @@ public class TelaComandos extends JDialog implements ActionListener{
 
         addLabel(new JLabel("Botão esquerdo do mouse: Desenhar objetos."), panel);
         addLabel(new JLabel("Botão direito do mouse: Selecionar objetos."), panel);
-        addLabel(new JLabel("Botão do meio do mouse[pressionado]: Mover janela de visualização."), panel);
-        addLabel(new JLabel("Botão do meio do mouse[girar]: Zoom in e zoom out."), panel);
+        addLabel(new JLabel("Botão do meio do mouse [pressionado]: Mover janela de visualização."), panel);
+        addLabel(new JLabel("Botão do meio do mouse [girar]: Zoom in e zoom out."), panel);
         addLabel(new JLabel("ESC: Cancelar desenho ou seleção."), panel);
         addLabel(new JLabel("DELETE: Deletar formas selecionadas."), panel);
-        addLabel(new JLabel("SHIFT[pressionado]: Ativer modo ortho de desenho."), panel);
+        addLabel(new JLabel("SHIFT [pressionado]: Ativer modo ortho de desenho."), panel);
     }
 
     private void addLabel(JLabel label, JPanel panel){

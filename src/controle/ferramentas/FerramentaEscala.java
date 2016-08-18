@@ -1,46 +1,57 @@
 package controle.ferramentas;
 
 import controle.ControleDesenho;
+import java.awt.geom.Point2D;
+import javax.swing.JOptionPane;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 public class FerramentaEscala implements Ferramenta {
-    
-    private int numClick;
-    
-    private int xRef;
-    private int yRef;
-    
-    private int xAtual;
-    private int yAtual;
+
+    private double xRef;
+    private double yRef;
     
     private final ControleDesenho controleDesenho;
     
     public FerramentaEscala(ControleDesenho controleDesenho){
         this.controleDesenho = controleDesenho;
-        numClick = 0;
+    }
+    
+    @Override
+    public void click(double x, double y){
+        xRef = x;
+        yRef = y;
+        ferramentaEscala();
+    }
+    
+    public void ferramentaEscala(){
+        if (controleDesenho.getRectSelecao() == null){
+            controleDesenho.mostrarMensagem("Não há objetos selecionados.");
+            return;
+        }
         
-    }
-    
-    @Override
-    public void atualizar(int x, int y){
-        xAtual = x;
-        yAtual = y;
-    }
-    
-    @Override
-    public void desenhar(){
-        
-    }
-    
-    @Override
-    public void click(int x, int y){
-        if (numClick == 0){
-            xRef = x;
-            yRef = y;
-            numClick++;
-        } else {
-            double sx = (x - xRef) * 0.5;
-            double sy = (y - yRef) * 0.5;
-            numClick = 0;
+        JSpinner sxField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
+        JSpinner syField = new JSpinner(new SpinnerNumberModel(1, -2000, 2000, 0.001));
+        Object[] message = {
+            "Mudança de Escala em X:", sxField,
+            "Mudança de Escala em Y:", syField
+        };
+
+        int option = JOptionPane.showConfirmDialog(null, message, "Escala", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            double sx = (double) sxField.getValue();
+            double sy = (double) syField.getValue();
+            
+            Point2D.Double referencia = new Point2D.Double(xRef, yRef);
+
+            for (int i = 0; i < controleDesenho.getFormas().size(); i++) {
+                if (controleDesenho.getFormas().get(i).estaSelecionada()) {
+                    controleDesenho.getFormas().get(i).escala(sx, sy, referencia);
+                    controleDesenho.getFormasWCS().set(i, controleDesenho.getFormas().get(i).viewportJanela(
+                            controleDesenho.getJanMin(), controleDesenho.getJanMax(), controleDesenho.getViewMin(), controleDesenho.getViewMax()));
+                }
+            }
+            controleDesenho.setRectSelecao(null);
         }
     }
     

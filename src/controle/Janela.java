@@ -37,6 +37,13 @@ public class Janela {
         setJanela(p1.getX(), p1.getY(), p2.getX(), p2.getY());
     }
     
+    public void pan(double dx, double dy){
+        xmin -= dx;
+        xmax -= dx;
+        ymin += dy;
+        ymax += dy;
+    }
+    
     public void atualizarMouse(double x, double y){
         mouseX = x;
         mouseY = y;
